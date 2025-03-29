@@ -4,6 +4,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from auth.repositories.user_repository import UserRepository
+from auth.repositories.token_repository import TokenRepository
 from auth.entities.user import User, UserCreate, UserLogin, Token, TokenData
 from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -12,8 +13,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepository, token_repository: TokenRepository):
         self.user_repository = user_repository
+        self.token_repository = token_repository
 
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -64,29 +66,62 @@ class AuthService:
         return await self.user_repository.create(user_create, hashed_password)
 
 
-    def create_tokens(self, user: User) -> Token:
-        access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    async def create_tokens(self, user: User) -> Token:
+        access_expires = datetime.utcnow() + timedelta(minutes=30)
+        refresh_expires = datetime.utcnow() + timedelta(days=7)
+
         access_token = self.create_access_token(
-            data={"sub": user.email}, expires_delta=access_token_expires
+            data={"sub": user.email, "exp": access_expires}
         )
-        refresh_token = self.create_refresh_token(data={"sub": user.email})
-        return Token(access_token=access_token, refresh_token=refresh_token)
+        refresh_token = self.create_refresh_token(
+            data={"sub": user.email, "exp": refresh_expires}
+        )
+
+        await self.token_repository.create(
+            user_id=user.id,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            access_expires=access_expires,
+            refresh_expires=refresh_expires
+        )
+
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
 
 
-    def verify_token(self, token: str) -> TokenData:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            email: str = payload.get("sub")
-            if email is None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Could not validate credentials",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            return TokenData(email=email)
-        except JWTError:
+    async def verify_token(self, token: str) -> User:
+        db_token = await self.token_repository.get_by_access_token(token)
+        if not db_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-                headers={"WWW-Authenticate": "Bearer"},
+                detail="Invalid or expired token"
             )
+        
+        user = await self.user_repository.get_by_id(db_token.user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+        
+        return user
+
+
+    async def refresh_tokens(self, refresh_token: str) -> Token:
+        db_token = await self.token_repository.get_by_refresh_token(refresh_token)
+        if not db_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token"
+            )
+
+        user = await self.user_repository.get_by_id(db_token.user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+
+        return await self.create_tokens(user)

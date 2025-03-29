@@ -16,6 +16,7 @@ asyncio = "*"
 pydantic = {extras = ["email"], version = "*"}
 python-multipart = "*"
 psycopg2-binary = "*"
+fastapi-utils = "*"
 
 [dev-packages]
 

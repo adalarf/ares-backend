@@ -9,6 +9,7 @@ import sys
 import os
 sys.path.append(os.path.join(sys.path[0], 'app'))
 from app.auth.models.user import UserModel
+from app.auth.models.token import TokenModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 
