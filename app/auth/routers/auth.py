@@ -4,7 +4,7 @@ from database import get_async_session
 from auth.repositories.user_repository import UserRepository
 from auth.services.auth_service import AuthService
 from auth.entities.user import UserCreate, UserLogin, Token
-from app.auth.repositories.token_repository import TokenRepository
+from auth.repositories.token_repository import TokenRepository
 
 
 router = APIRouter()
@@ -19,7 +19,7 @@ def get_auth_service(db: AsyncSession = Depends(get_async_session)) -> AuthServi
 @router.post("/register", response_model=Token)
 async def register(user: UserCreate, auth_service: AuthService = Depends(get_auth_service)):
     db_user = await auth_service.register_user(user)
-    return auth_service.create_tokens(db_user)
+    return await auth_service.create_tokens(db_user)
 
 
 @router.post("/login", response_model=Token)
@@ -34,7 +34,7 @@ async def login(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return auth_service.create_tokens(user)
+    return await auth_service.create_tokens(user)
 
 
 @router.post("/refresh", response_model=Token)

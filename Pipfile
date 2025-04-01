@@ -17,6 +17,7 @@ pydantic = {extras = ["email"], version = "*"}
 python-multipart = "*"
 psycopg2-binary = "*"
 fastapi-utils = "*"
+typing-inspect = "*"
 
 [dev-packages]
 
