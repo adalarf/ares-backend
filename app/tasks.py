@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi_utils.tasks import repeat_every
-from database import async_session_maker
-from auth.repositories.token_repository import TokenRepository
-from config import ACCESS_TOKEN_EXPIRE_MINUTES
+from .database import async_session_maker
+from app.auth.repositories.token_repository import TokenRepository
+from .config import ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 async def cleanup_expired_tokens():

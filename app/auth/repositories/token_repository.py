@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy import select, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from auth.models.token import TokenModel
-from auth.entities.user import Token
+from app.auth.models.token import TokenModel
+from app.auth.entities.user import Token
 
 
 class TokenRepository:
