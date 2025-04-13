@@ -10,7 +10,7 @@ class WorkoutDay(BaseModel):
 
 
 class WorkoutDayCreation(BaseModel):
-    id: Optional[int]
+    # id: Optional[int]
     workout_plan_id: int
     day_of_week: str
     date: Optional[str]

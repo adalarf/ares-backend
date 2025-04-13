@@ -20,4 +20,4 @@ class ExerciseModel(Base):
     
     planned_exercises = relationship("PlannedExerciseModel", back_populates="exercise")
     muscle_group = relationship("MuscleGroupModel", back_populates="exercises")
-    exercise_type = relationship("ExerciseTypeModel", back_populates="exercises")
+    # exercise_type = relationship("ExerciseTypeModel", back_populates="exercises")

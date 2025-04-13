@@ -11,6 +11,9 @@ from app.training.entities.workout_plan import WeeklyWorkoutPlanResponse, Workou
 import random
 from app.training.entities.workout_plan import WorkoutPlanResponse
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
+from app.training.models.workout_plan import WorkoutPlanModel
+from app.training.models.workout_day import WorkoutDayModel
+from datetime import date
 
 
 class TrainingService:
@@ -26,9 +29,9 @@ class TrainingService:
         self.muscle_group_repo = muscle_group_repo
 
 
-    async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user: UserModel) -> WeeklyWorkoutPlanResponse:
+    async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user_id: int) -> WeeklyWorkoutPlanResponse:
         days_per_week = self.determine_days_per_week(workout_plan_data.training_level)
-        workout_plan = await self.create_workout_plan(user)
+        workout_plan = await self.create_workout_plan(user_id, workout_plan_data)
         workout_days = await self.assign_workout_days(workout_plan, days_per_week, workout_plan_data)
 
         result_days = []
@@ -43,7 +46,7 @@ class TrainingService:
             ]
             result_days.append(WorkoutDayInfo(
                 day_of_week=workout_day.day_of_week,
-                date=workout_day.date,
+                date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 exercises=exercises_info
             ))
 
@@ -62,8 +65,13 @@ class TrainingService:
         }.get(training_level, 3)
 
 
-    async def create_workout_plan(self, user: UserModel):
-        workout_plan = WorkoutPlanCreation(user_id=user.id)
+    async def create_workout_plan(self, user_id: int, workout_plan_data: WorkoutPlanCreation) -> WorkoutPlanModel:
+        workout_plan = WorkoutPlanModel(
+            user_id=user_id,
+            # training_level=workout_plan_data.training_level,
+            # goal=workout_plan_data.goal,
+            # training_place=workout_plan_data.training_place
+        )
         return await self.workout_plan_repo.create(workout_plan)
 
 
@@ -82,11 +90,11 @@ class TrainingService:
         return workout_days
 
 
-    async def create_workout_day(self, workout_plan: WorkoutPlanCreation, day_index: int):
-        workout_day = WorkoutDayCreation(
+    async def create_workout_day(self, workout_plan: WorkoutPlanCreation, day_index: int) -> WorkoutDayModel:
+        workout_day = WorkoutDayModel(
             workout_plan_id=workout_plan.id,
             day_of_week=["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"][day_index],
-            date=None
+            date=date(2025, 4, 13)
         )
         return await self.workout_day_repo.create(workout_day)
 

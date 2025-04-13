@@ -11,8 +11,8 @@ class WorkoutPlan(BaseModel):
 
 
 class WorkoutPlanCreation(BaseModel):
-    id: Optional[int]
-    user_id: int
+    # id: Optional[int]
+    # user_id: int
     training_level: str
     goal: str
     training_place: str

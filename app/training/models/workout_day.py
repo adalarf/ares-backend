@@ -12,3 +12,4 @@ class WorkoutDayModel(Base):
     date = Column(Date, nullable=False)
 
     workout_plan = relationship("WorkoutPlanModel", back_populates="workout_days")
+    planned_exercises = relationship("PlannedExerciseModel", back_populates="workout_day")

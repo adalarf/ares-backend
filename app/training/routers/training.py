@@ -31,7 +31,7 @@ async def create_workout_plan(
     current_user: User = Depends(get_current_user),
     training_service: TrainingService = Depends(get_training_service)
 ):
-    return await training_service.create_weekly_workout_plan(workout_plan_data, current_user)
+    return await training_service.create_weekly_workout_plan(workout_plan_data, current_user.id)
 
 
 @router.get("/workout_plan/{workout_plan_id}", response_model=WeeklyWorkoutPlanResponse)
