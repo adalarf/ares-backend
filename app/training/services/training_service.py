@@ -166,18 +166,33 @@ class TrainingService:
 
 
     async def create_exercises(self, exercises_data: list[ExerciseCreation]):
+        created_exercises = []
         for exercise_data in exercises_data:
             existing_exercise = await self.exercise_repo.get_by_name(exercise_data.name)
             if not existing_exercise:
-                await self.exercise_repo.create(
+                created_exercise = await self.exercise_repo.create(
                     name=exercise_data.name,
                     sets_number=exercise_data.sets_number,
                     repetitions=exercise_data.repetitions,
                     training_place=exercise_data.training_place,
                     gems=exercise_data.gems,
-                    expirience_level=exercise_data.experienced_level,
+                    expirience_level=exercise_data.expirience_level,
                     muscle_group_id=exercise_data.muscle_group_id
                 )
+                created_exercises.append(created_exercise)
+        return [
+            ExerciseResponse(
+                id=exercise.id,
+                name=exercise.name,
+                sets_number=exercise.sets_number,
+                repetitions=exercise.repetitions,
+                training_place=exercise.training_place,
+                gems=exercise.gems,
+                expirience_level=exercise.expirience_level,
+                muscle_group_id=exercise.muscle_group_id
+            )
+            for exercise in created_exercises
+        ]
 
 
     async def get_exercises(self) -> list[ExerciseResponse]:

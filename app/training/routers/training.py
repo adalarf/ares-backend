@@ -11,6 +11,7 @@ from app.training.repositories.planned_exercise_repository import PlannedExercis
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository
 from app.training.repositories.muscle_group_repository import ExerciseRepository
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
+from app.training.entities.muscle_group import MuscleGroupResponse
 
 
 router = APIRouter()
@@ -55,7 +56,7 @@ async def create_muscle_groups(
     return muscle_groups
 
 
-@router.get("/muscle_groups", response_model=list[str])
+@router.get("/muscle_groups", response_model=list[MuscleGroupResponse])
 async def get_muscle_groups(
     training_service: TrainingService = Depends(get_training_service)
 ):
@@ -68,8 +69,7 @@ async def create_exercises(
     exercises_data: list[ExerciseCreation],
     training_service: TrainingService = Depends(get_training_service)
 ):
-    await training_service.create_exercises(exercises_data)
-    return exercises_data
+    return await training_service.create_exercises(exercises_data)
 
 
 @router.get("/exercises", response_model=list[ExerciseResponse])

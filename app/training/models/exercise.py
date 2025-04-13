@@ -16,7 +16,7 @@ class ExerciseModel(Base):
     image = Column(String, nullable=True)
 
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id", ondelete="CASCADE"), nullable=False)
-    exercise_type_id = Column(Integer, ForeignKey("exercise_types.id", ondelete="CASCADE"), nullable=False)
+    # exercise_type_id = Column(Integer, ForeignKey("exercise_types.id", ondelete="CASCADE"), nullable=False)
     
     planned_exercises = relationship("PlannedExerciseModel", back_populates="exercise")
     muscle_group = relationship("MuscleGroupModel", back_populates="exercises")
