@@ -10,6 +10,12 @@ import os
 sys.path.append(os.path.join(sys.path[0], 'app'))
 from app.auth.models.user import UserModel
 from app.auth.models.token import TokenModel
+from app.training.models.exercise_type import ExerciseTypeModel
+from app.training.models.exercise import ExerciseModel
+from app.training.models.workout_plan import WorkoutPlanModel
+from app.training.models.workout_day import WorkoutDayModel
+from app.training.models.planned_exercise import PlannedExerciseModel
+from app.training.models.muscle_group import MuscleGroupModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 

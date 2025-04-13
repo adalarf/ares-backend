@@ -49,8 +49,10 @@ class UserModel(Base):
     height = Column(Float, nullable=True)
     training_place = Column(Enum(TrainingPlaceEnum), nullable=True)
     load = Column(Enum(LoadEnum), nullable=True)
+    workout_week_days = Column(Integer, default=3)
 
     gems = Column(Integer, default=0)
     expirience = Column(Integer, default=0)
 
     tokens = relationship("TokenModel", back_populates="user", cascade="all, delete")
+    workout_plans = relationship("WorkoutPlanModel", back_populates="user", cascade="all, delete")
