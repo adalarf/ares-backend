@@ -8,12 +8,14 @@ class ExerciseModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    sets_number = Column(Integer, nullable=False)
-    repetitions = Column(Integer, nullable=False)
     training_place = Column(String, nullable=False)
-    gems = Column(Integer, nullable=False)
-    expirience_level = Column(String, nullable=False)
     image = Column(String, nullable=True)
+
+    sets_number_default = Column(Integer, nullable=False)
+    repetitions_default = Column(Integer, nullable=False)
+    gems_default = Column(Integer, nullable=False)
+    expirience_default = Column(Integer, nullable=False)
+    expirience_level = Column(String, nullable=False)
 
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id", ondelete="CASCADE"), nullable=False)
     # exercise_type_id = Column(Integer, ForeignKey("exercise_types.id", ondelete="CASCADE"), nullable=False)

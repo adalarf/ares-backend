@@ -43,13 +43,17 @@ class ExerciseRepository:
         return result.scalars().all()
 
 
-    async def create(self, name: str, sets_number: int, repetitions: int, training_place: str, gems: int, expirience_level: str, muscle_group_id: int) -> ExerciseModel:
+    async def create(self, name: str, sets_number_default: int, 
+                     repetitions_default: int, training_place: str, 
+                     gems_default: int, expirience_level: str, 
+                     muscle_group_id: int, expirience_default: int) -> ExerciseModel:
         exercise = ExerciseModel(
             name=name,
-            sets_number=sets_number,
-            repetitions=repetitions,
             training_place=training_place,
-            gems=gems,
+            sets_number_default=sets_number_default,
+            repetitions_default=repetitions_default,
+            gems_default=gems_default,
+            expirience_default=expirience_default,
             expirience_level=expirience_level,
             muscle_group_id=muscle_group_id
         )

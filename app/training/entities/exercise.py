@@ -1,26 +1,27 @@
 from pydantic import BaseModel
-from typing import Optional
 
 
 class ExerciseCreation(BaseModel):
     name: str
-    sets_number: int
-    repetitions: int
     training_place: str
-    gems: int
-    expirience_level: str
     muscle_group_id: int
+    sets_number_default: int
+    repetitions_default: int
+    gems_default: int
+    expirience_default: int
+    expirience_level: str
 
 
 class ExerciseResponse(BaseModel):
     id: int
     name: str
-    sets_number: int
-    repetitions: int
     training_place: str
-    gems: int
-    expirience_level: str
     muscle_group_id: int
+    sets_number_default: int
+    repetitions_default: int
+    gems_default: int
+    expirience_default: int
+    expirience_level: str
 
     class Config:
         orm_mode = True

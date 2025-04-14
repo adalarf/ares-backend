@@ -11,8 +11,6 @@ class WorkoutPlan(BaseModel):
 
 
 class WorkoutPlanCreation(BaseModel):
-    # id: Optional[int]
-    # user_id: int
     training_level: str
     goal: str
     training_place: str
@@ -32,6 +30,12 @@ class WorkoutPlanResponse(BaseModel):
 class ExerciseInfo(BaseModel):
     exercise_id: int
     workout_day_id: int
+    sets_number: int
+    repetitions: int
+    gems: int
+    expirience: int
+    name: str
+    image: str
 
 
 class WorkoutDayInfo(BaseModel):

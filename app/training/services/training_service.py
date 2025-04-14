@@ -1,11 +1,9 @@
 from app.training.repositories.workout_plan_repository import WorkoutPlanRepository
 from app.training.repositories.workout_day_repository import WorkoutDayRepository
 from app.training.repositories.planned_exercise_repository import PlannedExerciseRepository
-from app.auth.models.user import UserModel
 from app.training.entities.workout_plan import WorkoutPlanCreation
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository
 from app.training.repositories.muscle_group_repository import ExerciseRepository
-from app.training.entities.workout_day import WorkoutDayCreation
 from app.training.entities.planned_exercise import PlannedExerciseCreation
 from app.training.entities.workout_plan import WeeklyWorkoutPlanResponse, WorkoutDayInfo, ExerciseInfo
 import random
@@ -40,7 +38,13 @@ class TrainingService:
             exercises_info = [
                 ExerciseInfo(
                     exercise_id=exercise.exercise_id,
-                    workout_day_id=exercise.workout_day_id
+                    workout_day_id=exercise.workout_day_id,
+                    sets_number=exercise.sets_number,
+                    repetitions=exercise.repetitions,
+                    gems=exercise.gems,
+                    expirience=exercise.expirience,
+                    name=exercise.exercise.name,
+                    image=exercise.exercise.image or ""
                 )
                 for exercise in planned_exercises
             ]
@@ -67,10 +71,7 @@ class TrainingService:
 
     async def create_workout_plan(self, user_id: int, workout_plan_data: WorkoutPlanCreation) -> WorkoutPlanModel:
         workout_plan = WorkoutPlanModel(
-            user_id=user_id,
-            # training_level=workout_plan_data.training_level,
-            # goal=workout_plan_data.goal,
-            # training_place=workout_plan_data.training_place
+            user_id=user_id
         )
         return await self.workout_plan_repo.create(workout_plan)
 
@@ -99,24 +100,43 @@ class TrainingService:
         return await self.workout_day_repo.create(workout_day)
 
 
-    async def assign_exercises_to_day(self, workout_day: WorkoutDayCreation, muscle_group: str, 
+    async def assign_exercises_to_day(self, workout_day: WorkoutDayModel, muscle_group: str, 
                                       workout_plan_data: WorkoutPlanCreation):
         exercises = await self.get_exercises_for_muscle_group(muscle_group, workout_plan_data.training_place)
+
+        if not exercises:
+            print(f"No exercises found for muscle group: {muscle_group} and place: {workout_plan_data.training_place}")
+            return
+
         for exercise in exercises[:3]:
             planned_exercise = PlannedExerciseCreation(
                 workout_day_id=workout_day.id,
-                exercise_id=exercise.id
+                exercise_id=exercise.id,
+                sets_number=exercise.sets_number_default,
+                repetitions=exercise.repetitions_default,
+                gems=exercise.gems_default,
+                expirience=exercise.expirience_default
             )
             await self.planned_exercise_repo.create(planned_exercise)
 
 
     async def get_exercises_for_muscle_group(self, muscle_group: str, training_place: str):
         muscle_group_model = await self.muscle_group_repo.get_by_name(muscle_group)
+        print(muscle_group)
         if not muscle_group_model:
+            print(f"Muscle group not found: {muscle_group}")
             return []
 
-        return await self.exercise_repo.get_by_muscle_group_and_place(muscle_group_model.id, 
-                                                                      training_place)
+        exercises = await self.exercise_repo.get_by_muscle_group_and_place(
+            muscle_group_id=muscle_group_model.id,
+            training_place=training_place
+        )
+
+        if not exercises:
+            print(f"No exercises found for muscle group ID: {muscle_group_model.id} and place: {training_place}")
+
+        return exercises
+
 
     async def get_workout_plan_by_id(self, workout_plan_id: int) -> WorkoutPlanResponse:
         workout_plan = await self.workout_plan_repo.get_by_id(workout_plan_id)
@@ -130,7 +150,13 @@ class TrainingService:
             exercises_info = [
                 ExerciseInfo(
                     exercise_id=exercise.exercise_id,
-                    workout_day_id=exercise.workout_day_id
+                    workout_day_id=exercise.workout_day_id,
+                    sets_number=exercise.sets_number,
+                    repetitions=exercise.repetitions,
+                    gems=exercise.gems,
+                    expirience=exercise.expirience,
+                    name=exercise.exercise.name,
+                    image=exercise.exercise.image
                 )
                 for exercise in planned_exercises
             ]
@@ -172,23 +198,20 @@ class TrainingService:
             if not existing_exercise:
                 created_exercise = await self.exercise_repo.create(
                     name=exercise_data.name,
-                    sets_number=exercise_data.sets_number,
-                    repetitions=exercise_data.repetitions,
                     training_place=exercise_data.training_place,
-                    gems=exercise_data.gems,
+                    muscle_group_id=exercise_data.muscle_group_id,
+                    sets_number_default=exercise_data.sets_number_default,
+                    repetitions_default=exercise_data.repetitions_default,
+                    gems_default=exercise_data.gems_default,
                     expirience_level=exercise_data.expirience_level,
-                    muscle_group_id=exercise_data.muscle_group_id
+                    expirience_default=exercise_data.expirience_default
                 )
                 created_exercises.append(created_exercise)
         return [
             ExerciseResponse(
                 id=exercise.id,
                 name=exercise.name,
-                sets_number=exercise.sets_number,
-                repetitions=exercise.repetitions,
                 training_place=exercise.training_place,
-                gems=exercise.gems,
-                expirience_level=exercise.expirience_level,
                 muscle_group_id=exercise.muscle_group_id
             )
             for exercise in created_exercises
@@ -201,10 +224,11 @@ class TrainingService:
             ExerciseResponse(
                 id=exercise.id,
                 name=exercise.name,
-                sets_number=exercise.sets_number,
-                repetitions=exercise.repetitions,
+                sets_number_default=exercise.sets_number_default,
+                repetitions_default=exercise.repetitions_default,
                 training_place=exercise.training_place,
-                gems=exercise.gems,
+                gems_default=exercise.gems_default,
+                expirience_default=exercise.expirience_default,
                 expirience_level=exercise.expirience_level,
                 muscle_group_id=exercise.muscle_group_id
             )
