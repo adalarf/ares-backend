@@ -10,6 +10,8 @@ class WorkoutDayModel(Base):
     workout_plan_id = Column(Integer, ForeignKey("workout_plan.id", ondelete="CASCADE"), nullable=False)
     day_of_week = Column(String, nullable=False)
     date = Column(Date, nullable=False)
+    muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id", ondelete="SET NULL"), nullable=True)
 
     workout_plan = relationship("WorkoutPlanModel", back_populates="workout_days")
     planned_exercises = relationship("PlannedExerciseModel", back_populates="workout_day")
+    muscle_group = relationship("MuscleGroupModel", back_populates="workout_days")

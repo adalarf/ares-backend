@@ -41,6 +41,8 @@ class ExerciseInfo(BaseModel):
 class WorkoutDayInfo(BaseModel):
     day_of_week: str
     date: Optional[str]
+    image: Optional[str] = None
+    muscle_group: str
     exercises: List[ExerciseInfo]
 
 

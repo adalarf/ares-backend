@@ -15,8 +15,8 @@ class MuscleGroupRepository:
         return result.scalar_one_or_none()
 
 
-    async def create(self, name: str) -> MuscleGroupModel:
-        muscle_group = MuscleGroupModel(name=name)
+    async def create(self, name: str, image: str = None) -> MuscleGroupModel:
+        muscle_group = MuscleGroupModel(name=name, image=image)
         self.db.add(muscle_group)
         await self.db.commit()
         await self.db.refresh(muscle_group)
@@ -27,6 +27,12 @@ class MuscleGroupRepository:
         query = select(MuscleGroupModel)
         result = await self.db.execute(query)
         return result.scalars().all()
+
+
+    async def get_by_id(self, id: int) -> MuscleGroupModel | None:
+        query = select(MuscleGroupModel).where(MuscleGroupModel.id == id)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
 
 
 class ExerciseRepository:

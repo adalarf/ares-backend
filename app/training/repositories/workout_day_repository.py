@@ -1,6 +1,7 @@
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.training.models.workout_day import WorkoutDayModel
+from sqlalchemy.orm import selectinload
 
 
 class WorkoutDayRepository:
@@ -36,6 +37,10 @@ class WorkoutDayRepository:
         await self.db.commit()
 
     async def get_by_workout_plan_id(self, workout_plan_id: int) -> list[WorkoutDayModel]:
-        query = select(WorkoutDayModel).where(WorkoutDayModel.workout_plan_id == workout_plan_id)
+        query = (
+            select(WorkoutDayModel)
+            .options(selectinload(WorkoutDayModel.muscle_group))
+            .where(WorkoutDayModel.workout_plan_id == workout_plan_id)
+        )
         result = await self.db.execute(query)
         return result.scalars().all()

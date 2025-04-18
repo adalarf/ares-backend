@@ -54,6 +54,8 @@ class TrainingService:
             result_days.append(WorkoutDayInfo(
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
+                image=workout_day.muscle_group.image or "",
+                muscle_group=workout_day.muscle_group,
                 exercises=exercises_info
             ))
 
@@ -79,26 +81,26 @@ class TrainingService:
         return await self.workout_plan_repo.create(workout_plan)
 
 
-    async def assign_workout_days(self, workout_plan: WorkoutPlanCreation, 
-                                  days_per_week: int, workout_plan_data: WorkoutPlanCreation):
-        muscle_groups = ["Грудь", "Спина", "Ноги", "Плечи", "Кардио"]
+    async def assign_workout_days(self, workout_plan: WorkoutPlanModel, days_per_week: int, workout_plan_data: WorkoutPlanCreation):
+        muscle_groups = await self.muscle_group_repo.get_all()
         random.shuffle(muscle_groups)
-        selected_days = muscle_groups[:days_per_week]
+        selected_groups = muscle_groups[:days_per_week]
 
         workout_days = []
-        for day_index, muscle_group in enumerate(selected_days):
-            workout_day = await self.create_workout_day(workout_plan, day_index)
-            await self.assign_exercises_to_day(workout_day, muscle_group, workout_plan_data)
+        for day_index, muscle_group in enumerate(selected_groups):
+            workout_day = await self.create_workout_day(workout_plan, day_index, muscle_group.id)
+            await self.assign_exercises_to_day(workout_day, muscle_group.name, workout_plan_data)
             workout_days.append(workout_day)
 
         return workout_days
 
 
-    async def create_workout_day(self, workout_plan: WorkoutPlanCreation, day_index: int) -> WorkoutDayModel:
+    async def create_workout_day(self, workout_plan: WorkoutPlanModel, day_index: int, muscle_group_id: int = None) -> WorkoutDayModel:
         workout_day = WorkoutDayModel(
             workout_plan_id=workout_plan.id,
             day_of_week=["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"][day_index],
-            date=date(2025, 4, 13)
+            date=date(2025, 4, 13),
+            muscle_group_id=muscle_group_id
         )
         return await self.workout_day_repo.create(workout_day)
 
@@ -173,6 +175,8 @@ class TrainingService:
             days_info.append(WorkoutDayInfo(
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
+                image=workout_day.muscle_group.image or "",
+                muscle_group=workout_day.muscle_group.name,
                 exercises=exercises_info
             ))
 
@@ -183,11 +187,11 @@ class TrainingService:
         )
 
 
-    async def create_muscle_groups(self, muscle_groups: list[str]):
-        for group_name in muscle_groups:
-            existing_group = await self.muscle_group_repo.get_by_name(group_name)
+    async def create_muscle_groups(self, muscle_groups: list[dict]):
+        for group in muscle_groups:
+            existing_group = await self.muscle_group_repo.get_by_name(group["name"])
             if not existing_group:
-                await self.muscle_group_repo.create(group_name)
+                await self.muscle_group_repo.create(group["name"], group.get("image"))
 
 
     async def get_muscle_groups(self):
@@ -195,7 +199,8 @@ class TrainingService:
         return [
             {
                 "id": muscle_group.id,
-                "name": muscle_group.name
+                "name": muscle_group.name,
+                "image": muscle_group.image
             }
             for muscle_group in muscle_groups
         ]
