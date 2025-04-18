@@ -35,7 +35,7 @@ class ExerciseInfo(BaseModel):
     gems: int
     expirience: int
     name: str
-    image: str
+    image: Optional[str] = None
 
 
 class WorkoutDayInfo(BaseModel):

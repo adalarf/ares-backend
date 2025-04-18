@@ -28,6 +28,9 @@ class TrainingService:
 
 
     async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user_id: int) -> WeeklyWorkoutPlanResponse:
+        existeding_plan = await self.workout_plan_repo.get_by_user_id(user_id)
+        if existeding_plan:
+            return await self.get_workout_plan_by_id(existeding_plan[0].id)
         days_per_week = self.determine_days_per_week(workout_plan_data.training_level)
         workout_plan = await self.create_workout_plan(user_id, workout_plan_data)
         workout_days = await self.assign_workout_days(workout_plan, days_per_week, workout_plan_data)
@@ -138,7 +141,14 @@ class TrainingService:
         return exercises
 
 
-    async def get_workout_plan_by_id(self, workout_plan_id: int) -> WorkoutPlanResponse:
+    async def get_workout_plan_id_by_user_id(self, user_id: int) -> int:
+        workout_plan = await self.workout_plan_repo.get_by_user_id(user_id)
+        if not workout_plan:
+            raise ValueError(f"Workout plan for user ID {user_id} not found.")
+        return workout_plan[0].id
+
+
+    async def get_workout_plan_by_id(self, workout_plan_id: int) -> WeeklyWorkoutPlanResponse:
         workout_plan = await self.workout_plan_repo.get_by_id(workout_plan_id)
         if not workout_plan:
             raise ValueError(f"Workout plan with ID {workout_plan_id} not found.")
@@ -156,13 +166,13 @@ class TrainingService:
                     gems=exercise.gems,
                     expirience=exercise.expirience,
                     name=exercise.exercise.name,
-                    image=exercise.exercise.image
+                    image=exercise.exercise.image or ""
                 )
                 for exercise in planned_exercises
             ]
             days_info.append(WorkoutDayInfo(
                 day_of_week=workout_day.day_of_week,
-                date=workout_day.date,
+                date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 exercises=exercises_info
             ))
 

@@ -35,13 +35,13 @@ async def create_workout_plan(
     return await training_service.create_weekly_workout_plan(workout_plan_data, current_user.id)
 
 
-@router.get("/workout_plan/{workout_plan_id}", response_model=WeeklyWorkoutPlanResponse)
+@router.get("/workout_plan", response_model=WeeklyWorkoutPlanResponse)
 async def get_workout_plan(
-    workout_plan_id: int,
     current_user: User = Depends(get_current_user),
     training_service: TrainingService = Depends(get_training_service)
 ):
-    workout_plan = await training_service.get_workout_plan_by_id(workout_plan_id, current_user.id)
+    workout_plan_id = await training_service.get_workout_plan_id_by_user_id(current_user.id)
+    workout_plan = await training_service.get_workout_plan_by_id(workout_plan_id)
     if not workout_plan:
         raise HTTPException(status_code=404, detail="Workout plan not found")
     return workout_plan

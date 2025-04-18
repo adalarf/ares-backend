@@ -34,3 +34,9 @@ class WorkoutPlanRepository:
         query = delete(WorkoutPlanModel).where(WorkoutPlanModel.id == workout_plan_id)
         await self.db.execute(query)
         await self.db.commit()
+
+
+    async def get_by_user_id(self, user_id: int) -> list[WorkoutPlanModel] | None:
+        query = select(WorkoutPlanModel).where(WorkoutPlanModel.user_id == user_id)
+        result = await self.db.execute(query)
+        return result.scalars().all()
