@@ -39,6 +39,7 @@ class ExerciseInfo(BaseModel):
 
 
 class WorkoutDayInfo(BaseModel):
+    id: int
     day_of_week: str
     date: Optional[str]
     image: Optional[str] = None

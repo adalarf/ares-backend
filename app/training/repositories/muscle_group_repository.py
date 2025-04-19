@@ -2,6 +2,7 @@ from sqlalchemy import select
 from app.training.models.muscle_group import MuscleGroupModel
 from app.training.models.exercise import ExerciseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 
 class MuscleGroupRepository:
@@ -41,7 +42,7 @@ class ExerciseRepository:
 
 
     async def get_by_muscle_group_and_place(self, muscle_group_id: int, training_place: str) -> list[ExerciseModel]:
-        query = select(ExerciseModel).where(
+        query = select(ExerciseModel).options(selectinload(ExerciseModel.muscle_group)).where(
             ExerciseModel.muscle_group_id == muscle_group_id,
             ExerciseModel.training_place == training_place
         )

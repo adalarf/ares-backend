@@ -28,12 +28,13 @@ class TrainingService:
 
 
     async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user_id: int) -> WeeklyWorkoutPlanResponse:
-        existeding_plan = await self.workout_plan_repo.get_by_user_id(user_id)
-        if existeding_plan:
-            return await self.get_workout_plan_by_id(existeding_plan[0].id)
+        existing_plan = await self.workout_plan_repo.get_by_user_id(user_id)
+        if existing_plan:
+            return await self.get_workout_plan_by_id(existing_plan[0].id)
         days_per_week = self.determine_days_per_week(workout_plan_data.training_level)
         workout_plan = await self.create_workout_plan(user_id, workout_plan_data)
-        workout_days = await self.assign_workout_days(workout_plan, days_per_week, workout_plan_data)
+        await self.assign_workout_days(workout_plan, days_per_week, workout_plan_data)
+        workout_days = await self.workout_day_repo.get_by_workout_plan_id(workout_plan.id)
 
         result_days = []
         for workout_day in workout_days:
@@ -52,10 +53,11 @@ class TrainingService:
                 for exercise in planned_exercises
             ]
             result_days.append(WorkoutDayInfo(
+                id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 image=workout_day.muscle_group.image or "",
-                muscle_group=workout_day.muscle_group,
+                muscle_group=workout_day.muscle_group.name,
                 exercises=exercises_info
             ))
 
@@ -127,7 +129,6 @@ class TrainingService:
 
     async def get_exercises_for_muscle_group(self, muscle_group: str, training_place: str):
         muscle_group_model = await self.muscle_group_repo.get_by_name(muscle_group)
-        print(muscle_group)
         if not muscle_group_model:
             print(f"Muscle group not found: {muscle_group}")
             return []
@@ -173,6 +174,7 @@ class TrainingService:
                 for exercise in planned_exercises
             ]
             days_info.append(WorkoutDayInfo(
+                id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 image=workout_day.muscle_group.image or "",
