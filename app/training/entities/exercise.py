@@ -15,6 +15,8 @@ class ExerciseCreation(BaseModel):
 class ExerciseResponse(BaseModel):
     id: int
     name: str
+    description: str | None = None
+    image: str | None = None
     training_place: str
     muscle_group_id: int
     sets_number_default: int

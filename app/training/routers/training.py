@@ -10,6 +10,7 @@ from app.training.repositories.workout_day_repository import WorkoutDayRepositor
 from app.training.repositories.planned_exercise_repository import PlannedExerciseRepository
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository
 from app.training.repositories.muscle_group_repository import ExerciseRepository
+from app.training.repositories.random_exercise_repository import RandomExerciseRepository
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
 from app.training.entities.muscle_group import MuscleGroupResponse
 
@@ -21,9 +22,10 @@ def get_training_service(db: AsyncSession = Depends(get_async_session)) -> Train
     workout_day_repo = WorkoutDayRepository(db)
     planned_exercise_repo = PlannedExerciseRepository(db)
     exercise_repo = ExerciseRepository(db)
+    random_exercise_repo = RandomExerciseRepository(db)
     muscle_group_repo = MuscleGroupRepository(db)
     return TrainingService(workout_plan_repo, workout_day_repo, 
-                           planned_exercise_repo, exercise_repo, muscle_group_repo)
+                           planned_exercise_repo, exercise_repo, random_exercise_repo, muscle_group_repo)
 
 
 @router.post("/workout_plan", response_model=WeeklyWorkoutPlanResponse)
@@ -45,6 +47,29 @@ async def get_workout_plan(
     if not workout_plan:
         raise HTTPException(status_code=404, detail="Workout plan not found")
     return workout_plan
+
+
+@router.post("/random_exercise")
+async def create_random_exercise(
+    workout_plan_data: WorkoutPlanCreation,
+    current_user: User = Depends(get_current_user),
+    training_service: TrainingService = Depends(get_training_service)
+):
+    # workout_plan_id = await training_service.get_workout_plan_id_by_user_id(current_user.id)
+    # if not workout_plan_id:
+    #     raise HTTPException(status_code=404, detail="Workout plan not found")
+    
+    exercise = await training_service.create_random_exercise(workout_plan_data, current_user.id)
+    return exercise
+
+
+@router.get("/random_exercise")
+async def get_random_exercise(
+    current_user: User = Depends(get_current_user),
+    training_service: TrainingService = Depends(get_training_service)
+):
+    random_exercise = await training_service.get_random_exercises_by_user(current_user.id)
+    return random_exercise
 
 
 @router.post("/muscle_groups")

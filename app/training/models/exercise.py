@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -8,6 +8,7 @@ class ExerciseModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
     training_place = Column(String, nullable=False)
     image = Column(String, nullable=True)
 
@@ -22,4 +23,5 @@ class ExerciseModel(Base):
     
     planned_exercises = relationship("PlannedExerciseModel", back_populates="exercise")
     muscle_group = relationship("MuscleGroupModel", back_populates="exercises")
+    random_exercises = relationship("RandomExerciseModel", back_populates="exercise")
     # exercise_type = relationship("ExerciseTypeModel", back_populates="exercises")

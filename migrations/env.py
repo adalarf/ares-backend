@@ -16,6 +16,7 @@ from app.training.models.workout_plan import WorkoutPlanModel
 from app.training.models.workout_day import WorkoutDayModel
 from app.training.models.planned_exercise import PlannedExerciseModel
 from app.training.models.muscle_group import MuscleGroupModel
+from app.training.models.random_exercise import RandomExerciseModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 

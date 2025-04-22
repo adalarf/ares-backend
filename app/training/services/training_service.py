@@ -4,11 +4,13 @@ from app.training.repositories.planned_exercise_repository import PlannedExercis
 from app.training.entities.workout_plan import WorkoutPlanCreation
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository
 from app.training.repositories.muscle_group_repository import ExerciseRepository
+from app.training.repositories.random_exercise_repository import RandomExerciseRepository
 from app.training.entities.planned_exercise import PlannedExerciseCreation
 from app.training.entities.workout_plan import WeeklyWorkoutPlanResponse, WorkoutDayInfo, ExerciseInfo
 import random
 from app.training.entities.workout_plan import WorkoutPlanResponse
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
+from app.training.entities.random_exercise import RandomExerciseCreation, RandomExerciseInfo
 from app.training.models.workout_plan import WorkoutPlanModel
 from app.training.models.workout_day import WorkoutDayModel
 from datetime import date
@@ -19,12 +21,14 @@ class TrainingService:
                  workout_day_repo: WorkoutDayRepository, 
                  planned_exercise_repo: PlannedExerciseRepository,
                  exercise_repo: ExerciseRepository,
+                 random_exercise_repo: RandomExerciseRepository,
                  muscle_group_repo: MuscleGroupRepository):
         self.workout_plan_repo = workout_plan_repo
         self.workout_day_repo = workout_day_repo
         self.planned_exercise_repo = planned_exercise_repo
         self.exercise_repo = exercise_repo
         self.muscle_group_repo = muscle_group_repo
+        self.random_exercise_repo = random_exercise_repo
 
 
     async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user_id: int) -> WeeklyWorkoutPlanResponse:
@@ -245,6 +249,8 @@ class TrainingService:
             ExerciseResponse(
                 id=exercise.id,
                 name=exercise.name,
+                description=exercise.description,
+                image=exercise.image or "",
                 sets_number_default=exercise.sets_number_default,
                 repetitions_default=exercise.repetitions_default,
                 training_place=exercise.training_place,
@@ -255,3 +261,48 @@ class TrainingService:
             )
             for exercise in exercises
         ]
+    
+
+    async def create_random_exercise(self, workout_plan_data: WorkoutPlanCreation, user_id: int):
+        exercises = await self.exercise_repo.get_all()
+        filtered = [e for e in exercises if e.training_place == workout_plan_data.training_place and e.expirience_level == workout_plan_data.training_level]
+        if not filtered:
+            return None
+        exercise = random.choice(filtered)
+        random_exercise = RandomExerciseCreation(
+            exercise_id=exercise.id,
+            user_id=user_id,
+            sets_number=exercise.sets_number_default,
+            repetitions=exercise.repetitions_default,
+            gems=exercise.gems_default,
+            expirience=exercise.expirience_default
+        )
+        random_exercise = await self.random_exercise_repo.create(random_exercise)
+
+        return RandomExerciseInfo(
+            id=random_exercise.id,
+            exercise_id=random_exercise.exercise.id,
+            sets_number=random_exercise.sets_number,
+            repetitions=random_exercise.repetitions,
+            gems=random_exercise.gems,
+            expirience=random_exercise.expirience,
+            name=random_exercise.exercise.name,
+            image=random_exercise.exercise.image or ""
+        )
+
+
+    async def get_random_exercises_by_user(self, user_id: int):
+        random_exercises = await self.random_exercise_repo.get_by_user_id(user_id)
+        random_exercise = random_exercises[0] if random_exercises else None
+        if not random_exercise:
+            return None
+        return RandomExerciseInfo(
+            id=random_exercise.id,
+            exercise_id=random_exercise.exercise.id,
+            sets_number=random_exercise.sets_number,
+            repetitions=random_exercise.repetitions,
+            gems=random_exercise.gems,
+            expirience=random_exercise.expirience,
+            name=random_exercise.exercise.name,
+            image=random_exercise.exercise.image or ""
+        )

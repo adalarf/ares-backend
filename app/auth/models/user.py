@@ -56,3 +56,4 @@ class UserModel(Base):
 
     tokens = relationship("TokenModel", back_populates="user", cascade="all, delete")
     workout_plans = relationship("WorkoutPlanModel", back_populates="user", cascade="all, delete")
+    random_exercises = relationship("RandomExerciseModel", back_populates="user", cascade="all, delete")
