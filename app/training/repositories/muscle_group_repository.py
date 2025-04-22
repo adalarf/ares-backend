@@ -40,6 +40,12 @@ class ExerciseRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    
+    async def get_by_muscle_group_id(self, id: int) -> list[ExerciseModel] | None:
+        query = select(ExerciseModel).where(ExerciseModel.muscle_group_id == id)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
 
     async def get_by_muscle_group_and_place(self, muscle_group_id: int, training_place: str) -> list[ExerciseModel]:
         query = select(ExerciseModel).options(selectinload(ExerciseModel.muscle_group)).where(

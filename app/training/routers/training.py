@@ -74,7 +74,8 @@ async def create_exercises(
 
 @router.get("/exercises", response_model=list[ExerciseResponse])
 async def get_exercises(
+    muscle_group_id: int = None,
     training_service: TrainingService = Depends(get_training_service)
 ):
-    exercises = await training_service.get_exercises()
+    exercises = await training_service.get_exercises(muscle_group_id)
     return exercises

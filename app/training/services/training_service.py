@@ -235,8 +235,12 @@ class TrainingService:
         ]
 
 
-    async def get_exercises(self) -> list[ExerciseResponse]:
-        exercises = await self.exercise_repo.get_all()
+    async def get_exercises(self, muscle_group_id: int = None) -> list[ExerciseResponse]:
+        if (muscle_group_id is not None):
+            exercises = await self.exercise_repo.get_by_muscle_group_id(muscle_group_id)
+            # exercises = [e for e in exercises if e.muscle_group_id == muscle_group_id]
+        else:
+            exercises = await self.exercise_repo.get_all()
         return [
             ExerciseResponse(
                 id=exercise.id,
