@@ -17,6 +17,11 @@ from app.training.models.workout_day import WorkoutDayModel
 from app.training.models.planned_exercise import PlannedExerciseModel
 from app.training.models.muscle_group import MuscleGroupModel
 from app.training.models.random_exercise import RandomExerciseModel
+from app.nutrition.models.dish import DishModel
+from app.nutrition.models.ingridient import IngredientModel
+from app.nutrition.models.meal import MealModel
+from app.nutrition.models.meal_plan import MealPlanModel
+from app.nutrition.models.restriction import RestrictionModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 

@@ -12,12 +12,14 @@ class User(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
     gender: Optional[GenderEnum] = None
+    age: Optional[int] = None
     goal: Optional[GoalEnum] = None
     activity: Optional[ActivityEnum] = None
     weight: Optional[float] = None
     height: Optional[float] = None
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
+    restrictions: Optional[list[str]] = None
 
     class Config:
         from_attributes = True

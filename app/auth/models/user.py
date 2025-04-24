@@ -43,6 +43,7 @@ class UserModel(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     gender = Column(Enum(GenderEnum), nullable=True)
+    age = Column(Integer, nullable=True)
     goal = Column(Enum(GoalEnum), nullable=True)
     activity = Column(Enum(ActivityEnum), nullable=True)
     weight = Column(Float, nullable=True)
@@ -57,3 +58,8 @@ class UserModel(Base):
     tokens = relationship("TokenModel", back_populates="user", cascade="all, delete")
     workout_plans = relationship("WorkoutPlanModel", back_populates="user", cascade="all, delete")
     random_exercises = relationship("RandomExerciseModel", back_populates="user", cascade="all, delete")
+    restrictions = relationship(
+        "RestrictionModel", 
+        secondary="user_restriction",
+        back_populates="users"
+    )
