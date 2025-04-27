@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.auth.routers import auth, stats
 from app.training.routers import training
+from app.nutrition.routers import nutrition
 from .tasks import setup_periodic_tasks
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,6 +11,7 @@ app = FastAPI(title="ARES Backend")
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(stats.router, prefix="/stats", tags=["stats"])
 app.include_router(training.router, prefix="/training", tags=["training"])
+app.include_router(nutrition.router, prefix="/nutrition", tags=["nutrition"])
 
 setup_periodic_tasks(app)
 

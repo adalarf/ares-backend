@@ -2,7 +2,10 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Float, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.auth.models.user import GoalEnum
+from app.nutrition.models.dish_ingredient import dish_ingredient
 import enum
+from app.nutrition.models.dish_restriction import dish_restriction
+
 
 
 class DishCategory(enum.Enum):
@@ -20,17 +23,21 @@ class DishModel(Base):
     proteins = Column(Float)
     fats = Column(Float)
     carbs = Column(Float)
-    category = Column(Enum(DishCategory))
+    category = Column(String)
     goal = Column(String)
 
     meals = relationship("MealModel", back_populates="dish", cascade="all, delete-orphan")
     ingredients = relationship(
         "IngredientModel", 
-        secondary="dish_ingredient",
+        secondary=dish_ingredient,
         back_populates="dishes"
     )
     restrictions = relationship(
         "RestrictionModel", 
-        secondary="dish_restriction",
-        back_populates="dishes"
+        secondary=dish_restriction,
+        back_populates="dishes",
+        overlaps="users,restrictions"
     )
+
+
+from app.nutrition.models.meal import MealModel

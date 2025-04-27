@@ -9,6 +9,12 @@ class MealModel(Base):
     plan_id = Column(Integer, ForeignKey("meal_plans.id"))
     dish_id = Column(Integer, ForeignKey("dishes.id"))
     grams = Column(Float)
+    proteins = Column(Float)
+    fats = Column(Float)
+    carbs = Column(Float)
 
     plan = relationship("MealPlanModel", back_populates="meals")
     dish = relationship("DishModel", back_populates="meals")
+
+
+from app.nutrition.models.meal_plan import MealPlanModel

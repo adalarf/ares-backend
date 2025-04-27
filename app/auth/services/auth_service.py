@@ -12,6 +12,8 @@ from app.database import get_async_session
 from app.config import SECRET_KEY, ALGORITHM
 from app.auth.models.user import UserModel
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -159,7 +161,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    query = select(UserModel).where(UserModel.email == user_email)
+    query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.email == user_email)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
     if user is None:

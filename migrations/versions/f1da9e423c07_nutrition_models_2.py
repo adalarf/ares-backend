@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.Column('proteins', sa.Float(), nullable=True),
     sa.Column('fats', sa.Float(), nullable=True),
     sa.Column('carbs', sa.Float(), nullable=True),
-    sa.Column('category', sa.Enum('BREAKFAST', 'LUNCH', 'DINNER', 'SNACK', name='dishcategory'), nullable=True),
+    sa.Column('category', sa.String(), nullable=True),
     sa.Column('goal', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )

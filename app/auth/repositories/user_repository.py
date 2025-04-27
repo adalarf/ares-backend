@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.models.user import UserModel
 from app.auth.entities.user import User, UserCreate, UserUpdate
 from typing import Optional
+from sqlalchemy.orm import selectinload
 
 
 class UserRepository:
@@ -11,7 +12,7 @@ class UserRepository:
 
 
     async def get_by_email(self, email: str) -> Optional[User]:
-        query = select(UserModel).where(UserModel.email == email)
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.email == email)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         if user:

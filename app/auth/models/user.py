@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.nutrition.models.user_restriction import user_restriction
 import enum
 
 
@@ -60,6 +61,13 @@ class UserModel(Base):
     random_exercises = relationship("RandomExerciseModel", back_populates="user", cascade="all, delete")
     restrictions = relationship(
         "RestrictionModel", 
-        secondary="user_restriction",
+        secondary=user_restriction,
         back_populates="users"
     )
+    # restriction_details = relationship(
+    #     "UserRestrictionModel",
+    #     back_populates="user"
+    # )
+
+
+from app.nutrition.models.restriction import RestrictionModel

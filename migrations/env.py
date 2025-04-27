@@ -8,6 +8,10 @@ from alembic import context
 import sys
 import os
 sys.path.append(os.path.join(sys.path[0], 'app'))
+from app.nutrition.models.user_restriction import user_restriction
+from app.nutrition.models.dish_ingredient import dish_ingredient
+from app.nutrition.models.dish_restriction import dish_restriction
+from app.nutrition.models.restriction import RestrictionModel
 from app.auth.models.user import UserModel
 from app.auth.models.token import TokenModel
 from app.training.models.exercise_type import ExerciseTypeModel
@@ -21,7 +25,6 @@ from app.nutrition.models.dish import DishModel
 from app.nutrition.models.ingridient import IngredientModel
 from app.nutrition.models.meal import MealModel
 from app.nutrition.models.meal_plan import MealPlanModel
-from app.nutrition.models.restriction import RestrictionModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 
