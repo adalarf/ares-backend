@@ -55,3 +55,16 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         return User.from_orm(db_user)
+
+
+    async def add_gems_and_experience(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
+        query = select(UserModel).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        db_user = result.scalar_one_or_none()
+        if not db_user:
+            return None
+        db_user.gems = (db_user.gems or 0) + gems
+        db_user.expirience = (db_user.expirience or 0) + expirience
+        await self.db.commit()
+        await self.db.refresh(db_user)
+        return User.from_orm(db_user)

@@ -13,6 +13,8 @@ from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
 from app.training.entities.random_exercise import RandomExerciseCreation, RandomExerciseInfo
 from app.training.models.workout_plan import WorkoutPlanModel
 from app.training.models.workout_day import WorkoutDayModel
+from app.auth.entities.user import User
+from app.auth.repositories.user_repository import UserRepository
 from datetime import date, timedelta
 
 
@@ -22,13 +24,15 @@ class TrainingService:
                  planned_exercise_repo: PlannedExerciseRepository,
                  exercise_repo: ExerciseRepository,
                  random_exercise_repo: RandomExerciseRepository,
-                 muscle_group_repo: MuscleGroupRepository):
+                 muscle_group_repo: MuscleGroupRepository,
+                 user_repo: UserRepository):
         self.workout_plan_repo = workout_plan_repo
         self.workout_day_repo = workout_day_repo
         self.planned_exercise_repo = planned_exercise_repo
         self.exercise_repo = exercise_repo
         self.muscle_group_repo = muscle_group_repo
         self.random_exercise_repo = random_exercise_repo
+        self.user_repo = user_repo
 
 
     async def create_weekly_workout_plan(self, workout_plan_data: WorkoutPlanCreation, user_id: int) -> WeeklyWorkoutPlanResponse:
@@ -312,3 +316,18 @@ class TrainingService:
             name=random_exercise.exercise.name,
             image=random_exercise.exercise.image or ""
         )
+
+
+    async def complete_planned_exercise(self, planned_exercise_id: int, user: User):
+        planned_exercise = await self.planned_exercise_repo.get_by_id(planned_exercise_id)
+        if not planned_exercise:
+            raise ValueError(f"Planned exercise with ID {planned_exercise_id} not found.")
+        planned_exercise.is_active = False
+        await self.planned_exercise_repo.update(planned_exercise)
+        await self.user_repo.add_gems_and_experience(user.id, planned_exercise.gems, planned_exercise.expirience)
+
+        if not self.workout_day_repo.has_active_planned_exercise(planned_exercise.workout_day_id):
+            await self.workout_day_repo.deactivate_workout_day(planned_exercise.workout_day_id)
+        
+        return planned_exercise
+    

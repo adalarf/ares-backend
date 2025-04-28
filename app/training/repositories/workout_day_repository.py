@@ -2,6 +2,7 @@ from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.training.models.workout_day import WorkoutDayModel
 from sqlalchemy.orm import selectinload
+from app.training.models.planned_exercise import PlannedExerciseModel
 
 
 class WorkoutDayRepository:
@@ -44,3 +45,23 @@ class WorkoutDayRepository:
         )
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def deactivate_workout_day(self, workout_day_id: int):
+        query = (
+            update(WorkoutDayModel)
+            .where(WorkoutDayModel.id == workout_day_id)
+            .values(is_active=False)
+        )
+        await self.db.execute(query)
+        await self.db.commit()
+
+    async def has_active_planned_exercise(self, workout_day_id: int) -> bool:
+        query = (
+            select(PlannedExerciseModel)
+            .where(
+                PlannedExerciseModel.workout_day_id == workout_day_id,
+                PlannedExerciseModel.is_active == True
+            )
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none() is not None

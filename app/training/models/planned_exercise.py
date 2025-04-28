@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,7 @@ class PlannedExerciseModel(Base):
     repetitions = Column(Integer, nullable=False)
     gems = Column(Integer, nullable=False)
     expirience = Column(Integer, nullable=False)
+    is_active = Column(Boolean, default=True)
 
     workout_day_id = Column(Integer, ForeignKey("workout_days.id", ondelete="CASCADE"), nullable=False)
     exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False)

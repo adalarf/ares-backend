@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,7 @@ class WorkoutDayModel(Base):
     day_of_week = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id", ondelete="SET NULL"), nullable=True)
+    is_active = Column(Boolean, default=True)
 
     workout_plan = relationship("WorkoutPlanModel", back_populates="workout_days")
     planned_exercises = relationship("PlannedExerciseModel", back_populates="workout_day")
