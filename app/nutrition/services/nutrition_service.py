@@ -134,7 +134,21 @@ class NutritionService:
                 grams=meal["grams"],
                 proteins=meal["proteins"],
                 fats=meal["fats"],
-                carbs=meal["carbs"]
+                carbs=meal["carbs"],
+                is_eaten=False
             )
             meals.append(meal_obj)
+        plan.proteins = sum(meal["proteins"] for meal in plan_data)
+        plan.fats = sum(meal["fats"] for meal in plan_data)
+        plan.carbs = sum(meal["carbs"] for meal in plan_data)
+        plan.total_calories = sum(meal["grams"] * dish.calories / 100 for meal in plan_data)
+        await self.meal_plan_repo.update(plan)
         return plan, meals
+
+
+    async def get_meal_plan(self, user_id: int):
+        plan = await self.meal_plan_repo.get_by_user_id(user_id)
+        if not plan:
+            raise HTTPException(status_code=404, detail="Meal plan not found")
+        
+        return plan

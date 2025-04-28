@@ -55,6 +55,10 @@ async def generate_meal_plan(
     return MealPlanRead(
         id=plan.id,
         user_id=plan.user_id,
+        total_calories=plan.total_calories,
+        proteins=plan.proteins,
+        fats=plan.fats,
+        carbs=plan.carbs,
         meals=[
             MealRead(
             id=meal.id,
@@ -63,9 +67,43 @@ async def generate_meal_plan(
             grams=meal.grams,
             proteins=meal.proteins,
             fats=meal.fats,
-            carbs=meal.carbs
+            carbs=meal.carbs,
+            is_eaten=meal.is_eaten,
         )
         for meal, meal_data in zip(meals, plan_data)
+        ]
+    )
+
+
+@router.get("/meal_plan", response_model=MealPlanRead)
+async def get_meal_plan(
+    nutrition_service: NutritionService = Depends(get_nutrition_service),
+    current_user: User = Depends(get_current_user)
+):
+    meal_plan = await nutrition_service.get_meal_plan(current_user.id)
+    if not meal_plan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Meal plan not found"
+        )
+    return MealPlanRead(
+        id=meal_plan.id,
+        user_id=meal_plan.user_id,
+        total_calories=meal_plan.total_calories,
+        proteins=meal_plan.proteins,
+        fats=meal_plan.fats,
+        carbs=meal_plan.carbs,
+        meals=[
+            MealRead(
+                id=meal.id,
+                meal=meal.dish.category,
+                dish=meal.dish.name,
+                grams=meal.grams,
+                proteins=meal.proteins,
+                fats=meal.fats,
+                carbs=meal.carbs,
+                is_eaten=meal.is_eaten,
+            ) for meal in meal_plan.meals
         ]
     )
 

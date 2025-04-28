@@ -31,10 +31,15 @@ class MealPlanCreate(BaseModel):
 
 class MealRead(MealCreate):
     id: int
+    is_eaten: bool
 
 class MealPlanRead(BaseModel):
     id: int
     user_id: int
+    total_calories: float
+    proteins: float
+    fats: float
+    carbs: float
     meals: List[MealRead]
 
     class Config:

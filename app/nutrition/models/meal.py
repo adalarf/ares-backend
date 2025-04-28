@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, ForeignKey
+from sqlalchemy import Column, Integer, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -12,6 +12,7 @@ class MealModel(Base):
     proteins = Column(Float)
     fats = Column(Float)
     carbs = Column(Float)
+    is_eaten = Column(Boolean, default=False)
 
     plan = relationship("MealPlanModel", back_populates="meals")
     dish = relationship("DishModel", back_populates="meals")
