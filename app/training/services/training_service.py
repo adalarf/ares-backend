@@ -13,7 +13,7 @@ from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
 from app.training.entities.random_exercise import RandomExerciseCreation, RandomExerciseInfo
 from app.training.models.workout_plan import WorkoutPlanModel
 from app.training.models.workout_day import WorkoutDayModel
-from datetime import date
+from datetime import date, timedelta
 
 
 class TrainingService:
@@ -68,7 +68,9 @@ class TrainingService:
         return WeeklyWorkoutPlanResponse(
             workout_plan_id=workout_plan.id,
             user_id=workout_plan.user_id,
-            days=result_days
+            days=result_days,
+            week_start_date=workout_plan.week_start_date.strftime("%Y-%m-%d"),
+            week_end_date=workout_plan.week_end_date.strftime("%Y-%m-%d")
         )
 
 
@@ -82,7 +84,9 @@ class TrainingService:
 
     async def create_workout_plan(self, user_id: int, workout_plan_data: WorkoutPlanCreation) -> WorkoutPlanModel:
         workout_plan = WorkoutPlanModel(
-            user_id=user_id
+            user_id=user_id,
+            week_start_date=date.today(),
+            week_end_date=date.today() + timedelta(days=6)
         )
         return await self.workout_plan_repo.create(workout_plan)
 
@@ -101,11 +105,11 @@ class TrainingService:
         return workout_days
 
 
-    async def create_workout_day(self, workout_plan: WorkoutPlanModel, day_index: int, muscle_group_id: int = None) -> WorkoutDayModel:
+    async def create_workout_day(self, workout_plan: WorkoutPlanModel, day_index: int, muscle_group_id: int = None, workout_day_date: date = None) -> WorkoutDayModel:
         workout_day = WorkoutDayModel(
             workout_plan_id=workout_plan.id,
             day_of_week=["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"][day_index],
-            date=date(2025, 4, 13),
+            date=workout_day_date or date(2025, 4, 13),
             muscle_group_id=muscle_group_id
         )
         return await self.workout_day_repo.create(workout_day)
@@ -189,6 +193,8 @@ class TrainingService:
         return WeeklyWorkoutPlanResponse(
             workout_plan_id=workout_plan.id,
             user_id=workout_plan.user_id,
+            week_start_date=workout_plan.week_start_date.strftime("%Y-%m-%d"),
+            week_end_date=workout_plan.week_end_date.strftime("%Y-%m-%d"),
             days=days_info
         )
 

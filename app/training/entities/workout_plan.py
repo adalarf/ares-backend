@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import date
 
 
 class WorkoutPlan(BaseModel):
@@ -50,6 +51,8 @@ class WorkoutDayInfo(BaseModel):
 class WeeklyWorkoutPlanResponse(BaseModel):
     workout_plan_id: int
     user_id: int
+    week_start_date: date
+    week_end_date: date
     days: List[WorkoutDayInfo]
 
     class Config:
