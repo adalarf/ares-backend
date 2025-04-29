@@ -45,6 +45,8 @@ class WorkoutDayInfo(BaseModel):
     date: Optional[str]
     image: Optional[str] = None
     muscle_group: str
+    is_active: bool
+    is_completed: bool
     exercises: List[ExerciseInfo]
 
 

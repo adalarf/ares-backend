@@ -15,7 +15,7 @@ from app.training.models.workout_plan import WorkoutPlanModel
 from app.training.models.workout_day import WorkoutDayModel
 from app.auth.entities.user import User
 from app.auth.repositories.user_repository import UserRepository
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 
 class TrainingService:
@@ -66,6 +66,8 @@ class TrainingService:
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 image=workout_day.muscle_group.image or "",
                 muscle_group=workout_day.muscle_group.name,
+                is_active=workout_day.is_active,
+                is_completed=workout_day.is_completed,
                 exercises=exercises_info
             ))
 
@@ -100,21 +102,42 @@ class TrainingService:
         random.shuffle(muscle_groups)
         selected_groups = muscle_groups[:days_per_week]
 
+        today = date.today()
         workout_days = []
         for day_index, muscle_group in enumerate(selected_groups):
-            workout_day = await self.create_workout_day(workout_plan, day_index, muscle_group.id)
-            await self.assign_exercises_to_day(workout_day, muscle_group.name, workout_plan_data)
+            workout_day_date = today + timedelta(days=day_index)
+            is_active = (workout_day_date == today)
+            workout_day = await self.create_workout_day(workout_plan=workout_plan, 
+                                                        day_index=day_index, 
+                                                        muscle_group_id=muscle_group.id,
+                                                        workout_day_date=workout_day_date,
+                                                        is_active=is_active)
+            await self.assign_exercises_to_day(workout_day, muscle_group.name, 
+                                               workout_plan_data)
             workout_days.append(workout_day)
 
         return workout_days
 
 
-    async def create_workout_day(self, workout_plan: WorkoutPlanModel, day_index: int, muscle_group_id: int = None, workout_day_date: date = None) -> WorkoutDayModel:
+    def get_day_of_week(self, date_obj: date) -> str:
+        days = [
+            "Понедельник", "Вторник", "Среда",
+            "Четверг", "Пятница", "Суббота", "Воскресенье"
+        ]
+        return days[date_obj.weekday()]
+
+
+    async def create_workout_day(self, workout_plan: WorkoutPlanModel, 
+                                 day_index: int, muscle_group_id: int = None,
+                                 workout_day_date: date = None,
+                                 is_active: bool = False) -> WorkoutDayModel:
+        day_of_week = self.get_day_of_week(workout_day_date)
         workout_day = WorkoutDayModel(
             workout_plan_id=workout_plan.id,
-            day_of_week=["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"][day_index],
+            day_of_week=day_of_week,
             date=workout_day_date or date(2025, 4, 13),
-            muscle_group_id=muscle_group_id
+            muscle_group_id=muscle_group_id,
+            is_active=is_active
         )
         return await self.workout_day_repo.create(workout_day)
 

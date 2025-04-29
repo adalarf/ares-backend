@@ -10,6 +10,8 @@ from app.training.repositories.planned_exercise_repository import PlannedExercis
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository, ExerciseRepository
 from app.training.entities.workout_plan import WorkoutPlanCreation
 from datetime import date, timedelta
+from sqlalchemy import update
+from app.training.models.workout_day import WorkoutDayModel
 
 
 async def cleanup_expired_tokens():
@@ -28,7 +30,7 @@ async def cleanup_and_create_new_weekly_plans():
         training_service = TrainingService(
             workout_plan_repo, workout_day_repo, planned_exercise_repo, exercise_repo, muscle_group_repo
         )
-        all_plans = await workout_plan_repo.get_all()
+        all_plans = await workout_plan_repo.get_all() # get all
         today = date.today()
         for plan in all_plans:
             if (today - plan.week_start_date).days >= 7:
@@ -41,9 +43,40 @@ async def cleanup_and_create_new_weekly_plans():
                 await training_service.create_weekly_workout_plan(workout_plan_data, user_id)
 
 
+
+async def complete_past_workout_days():
+    today = date.today()
+    async with async_session_maker() as session:
+        query = (
+            update(WorkoutDayModel)
+            .where(WorkoutDayModel.date < today, WorkoutDayModel.is_completed == False)
+            .values(is_completed=True)
+        )
+        await session.execute(query)
+        await session.commit()
+
+
+async def update_active_workout_day():
+    today = date.today()
+    async with async_session_maker() as session:
+        await session.execute(
+            update(WorkoutDayModel)
+            .where(WorkoutDayModel.is_active == True)
+            .values(is_active=False)
+        )
+        await session.execute(
+            update(WorkoutDayModel)
+            .where(WorkoutDayModel.date == today)
+            .values(is_active=True)
+        )
+        await session.commit()
+
+
 def setup_periodic_tasks(app: FastAPI):
     @app.on_event("startup")
     @repeat_every(seconds=60 * int(ACCESS_TOKEN_EXPIRE_MINUTES))
     async def cleanup_tokens_task():
         await cleanup_expired_tokens()
         await cleanup_and_create_new_weekly_plans()
+        await complete_past_workout_days()
+        await update_active_workout_day()

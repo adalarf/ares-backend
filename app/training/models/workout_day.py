@@ -12,6 +12,7 @@ class WorkoutDayModel(Base):
     date = Column(Date, nullable=False)
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id", ondelete="SET NULL"), nullable=True)
     is_active = Column(Boolean, default=True)
+    is_completed = Column(Boolean, default=False)
 
     workout_plan = relationship("WorkoutPlanModel", back_populates="workout_days")
     planned_exercises = relationship("PlannedExerciseModel", back_populates="workout_day")

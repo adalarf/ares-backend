@@ -11,6 +11,7 @@ from app.training.repositories.planned_exercise_repository import PlannedExercis
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository
 from app.training.repositories.muscle_group_repository import ExerciseRepository
 from app.training.repositories.random_exercise_repository import RandomExerciseRepository
+from app.auth.repositories.user_repository import UserRepository
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
 from app.training.entities.muscle_group import MuscleGroupResponse
 
@@ -24,8 +25,11 @@ def get_training_service(db: AsyncSession = Depends(get_async_session)) -> Train
     exercise_repo = ExerciseRepository(db)
     random_exercise_repo = RandomExerciseRepository(db)
     muscle_group_repo = MuscleGroupRepository(db)
+    user_repo = UserRepository(db)
     return TrainingService(workout_plan_repo, workout_day_repo, 
-                           planned_exercise_repo, exercise_repo, random_exercise_repo, muscle_group_repo)
+                           planned_exercise_repo, exercise_repo, 
+                           random_exercise_repo, muscle_group_repo,
+                           user_repo)
 
 
 @router.post("/workout_plan", response_model=WeeklyWorkoutPlanResponse)
