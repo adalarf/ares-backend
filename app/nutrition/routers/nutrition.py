@@ -122,3 +122,19 @@ async def create_dish(dishes_data: DishesCreation, nutrition_service: NutritionS
             detail=str(e)
         )
 
+
+@router.post("/make_meal_eaten/{id}", response_model=MealRead)
+async def make_meal_eaten(id: int,
+                          nutrition_service: NutritionService = Depends(get_nutrition_service)):
+    meal = await nutrition_service.make_meal_eaten(id)
+
+    return MealRead(
+        id=meal.id,
+        meal=meal.dish.category,
+        dish=meal.dish.name,
+        grams=meal.grams,
+        proteins=meal.proteins,
+        fats=meal.fats,
+        carbs=meal.carbs,
+        is_eaten=meal.is_eaten
+    )

@@ -152,3 +152,10 @@ class NutritionService:
             raise HTTPException(status_code=404, detail="Meal plan not found")
         
         return plan
+
+
+    async def make_meal_eaten(self, id: int):
+        await self.meal_repo.make_eaten(id)
+
+        meal = await self.meal_repo.get_by_id(id)
+        return meal
