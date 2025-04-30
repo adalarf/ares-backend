@@ -28,3 +28,19 @@ class RandomExerciseRepository:
         query = select(RandomExerciseModel).options(selectinload(RandomExerciseModel.exercise)).where(RandomExerciseModel.user_id == user_id)
         result = await self.db.execute(query)
         return result.scalars().all()
+
+
+    async def get_by_id(self, random_exercise_id: int) -> RandomExerciseModel:
+        query = select(RandomExerciseModel).where(RandomExerciseModel.id == random_exercise_id)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+
+
+    async def delete(self, random_exercise_id: int) -> None:
+        query = select(RandomExerciseModel).where(RandomExerciseModel.id == random_exercise_id)
+        result = await self.db.execute(query)
+        random_exercise = result.scalar_one_or_none()
+        if random_exercise:
+            await self.db.delete(random_exercise)
+            await self.db.commit()
+        

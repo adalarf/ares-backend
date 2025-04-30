@@ -354,3 +354,13 @@ class TrainingService:
         
         return planned_exercise
     
+
+    async def complete_random_exercise(self, random_exercise_id: int, user: User):
+        random_exercise = await self.random_exercise_repo.get_by_id(random_exercise_id)
+        if not random_exercise:
+            raise ValueError(f"Random exercise with ID {random_exercise_id} not found.")
+        await self.user_repo.add_gems_and_experience(user.id, random_exercise.gems, random_exercise.expirience)
+        await self.random_exercise_repo.delete(random_exercise_id)
+
+        return random_exercise
+    

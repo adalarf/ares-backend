@@ -118,3 +118,13 @@ async def complete_exercise(
 ):
     await training_service.complete_planned_exercise(exercise_id, current_user)
     return {"message": "Exercise completed successfully"}
+
+
+@router.post("/complete_random_exercise/{exercise_id}")
+async def complete_random_exercise(
+    exercise_id: int,
+    current_user: User = Depends(get_current_user),
+    training_service: TrainingService = Depends(get_training_service)
+):
+    await training_service.complete_random_exercise(exercise_id, current_user)
+    return {"message": "Exercise completed successfully"}
