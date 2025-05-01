@@ -31,13 +31,14 @@ class PlannedExerciseRepository:
         return planned_exercise_model
     
 
-    async def update(self, planned_exercise_id: int, update_data: dict) -> PlannedExerciseModel | None:     
-        query = update(PlannedExerciseModel).where(PlannedExerciseModel.id == planned_exercise_id).values(**update_data)
-        result = await self.db.execute(query)
-        if result.rowcount == 0:
-            return None
+    async def update(self, planned_exercise_id: int):     
+        query = (
+            update(PlannedExerciseModel)
+            .where(PlannedExerciseModel.id == planned_exercise_id)
+            .values(is_active=False)
+        )
+        await self.db.execute(query)
         await self.db.commit()
-        return await self.get_by_id(planned_exercise_id)
     
 
     async def delete(self, planned_exercise_id: int) -> None:

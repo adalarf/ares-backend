@@ -35,6 +35,7 @@ class ExerciseInfo(BaseModel):
     repetitions: int
     gems: int
     expirience: int
+    is_active: bool
     name: str
     image: Optional[str] = None
 

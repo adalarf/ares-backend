@@ -197,12 +197,13 @@ class TrainingService:
             planned_exercises = await self.planned_exercise_repo.get_by_workout_day_id(workout_day.id)
             exercises_info = [
                 ExerciseInfo(
-                    exercise_id=exercise.exercise_id,
+                    exercise_id=exercise.id,
                     workout_day_id=exercise.workout_day_id,
                     sets_number=exercise.sets_number,
                     repetitions=exercise.repetitions,
                     gems=exercise.gems,
                     expirience=exercise.expirience,
+                    is_active=exercise.is_active,
                     name=exercise.exercise.name,
                     image=exercise.exercise.image or ""
                 )
@@ -214,6 +215,8 @@ class TrainingService:
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
                 image=workout_day.muscle_group.image or "",
                 muscle_group=workout_day.muscle_group.name,
+                is_active=workout_day.is_active,
+                is_completed=workout_day.is_completed,
                 exercises=exercises_info
             ))
 
@@ -345,8 +348,7 @@ class TrainingService:
         planned_exercise = await self.planned_exercise_repo.get_by_id(planned_exercise_id)
         if not planned_exercise:
             raise ValueError(f"Planned exercise with ID {planned_exercise_id} not found.")
-        planned_exercise.is_active = False
-        await self.planned_exercise_repo.update(planned_exercise)
+        await self.planned_exercise_repo.update(planned_exercise.id)
         await self.user_repo.add_gems_and_experience(user.id, planned_exercise.gems, planned_exercise.expirience)
 
         if not self.workout_day_repo.has_active_planned_exercise(planned_exercise.workout_day_id):

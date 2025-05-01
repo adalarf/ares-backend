@@ -80,4 +80,3 @@ class UserRepository:
         db_user.expirience = (db_user.expirience or 0) + expirience
         await self.db.commit()
         await self.db.refresh(db_user)
-        return User.from_orm(db_user)
