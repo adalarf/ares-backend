@@ -25,6 +25,10 @@ from app.nutrition.models.dish import DishModel
 from app.nutrition.models.ingridient import IngredientModel
 from app.nutrition.models.meal import MealModel
 from app.nutrition.models.meal_plan import MealPlanModel
+from app.blitz_poll.models.blitz_poll import BlitzPollModel
+from app.blitz_poll.models.blitz_question import BlitzQuestionModel
+from app.blitz_poll.models.question import QuestionModel
+from app.blitz_poll.models.answer import AnswerModel
 from app.config import DATABASE_URL_ALEMBIC
 from app.database import Base
 

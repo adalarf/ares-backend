@@ -64,6 +64,7 @@ class UserModel(Base):
         secondary=user_restriction,
         back_populates="users"
     )
+    blitz_polls = relationship("BlitzPollModel", back_populates="user", cascade="all, delete")
     # restriction_details = relationship(
     #     "UserRestrictionModel",
     #     back_populates="user"
