@@ -8,6 +8,8 @@ class BlitzPollModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    expirience_earned = Column(Integer, nullable=True, default=0)
+    gems_earned = Column(Integer, nullable=True, default=0)
 
     blitz_questions = relationship("BlitzQuestionModel", back_populates="blitz_poll", cascade="all, delete-orphan")
     user = relationship("UserModel", back_populates="blitz_polls")

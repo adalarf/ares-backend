@@ -13,6 +13,7 @@ from app.training.repositories.muscle_group_repository import ExerciseRepository
 from app.training.repositories.random_exercise_repository import RandomExerciseRepository
 from app.auth.repositories.user_repository import UserRepository
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
+from app.training.entities.random_exercise import RandomExerciseInfo
 from app.training.entities.muscle_group import MuscleGroupResponse
 
 
@@ -53,7 +54,7 @@ async def get_workout_plan(
     return workout_plan
 
 
-@router.post("/random_exercise")
+@router.post("/random_exercise", response_model=RandomExerciseInfo)
 async def create_random_exercise(
     workout_plan_data: WorkoutPlanCreation,
     current_user: User = Depends(get_current_user),
@@ -67,7 +68,7 @@ async def create_random_exercise(
     return exercise
 
 
-@router.get("/random_exercise")
+@router.get("/random_exercise", response_model=RandomExerciseInfo)
 async def get_random_exercise(
     current_user: User = Depends(get_current_user),
     training_service: TrainingService = Depends(get_training_service)

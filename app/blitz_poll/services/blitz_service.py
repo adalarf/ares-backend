@@ -26,13 +26,34 @@ class BlitzService:
             return None, f"Недостаточно вопросов в базе данных. Требуется {question_count}, найдено {len(questions)}"
 
         blitz_poll = await self.blitz_poll_repo.create_blitz_poll(user_id)
+        
         blitz_questions = await self.blitz_poll_repo.add_questions_to_blitz_poll(blitz_poll.id, questions)
         
         await self.db.commit()
         
+        questions_data = {}
+        for i, question in enumerate(questions):
+            answers = await self.question_repo.get_answers_for_question(question.id)
+            
+            questions_data[question.id] = {
+                "question_id": question.id,
+                "text": question.text,
+                "gems": blitz_questions[i].gems,
+                "expirience": blitz_questions[i].expirience,
+                "answers": []
+            }
+            
+            for answer in answers:
+                questions_data[question.id]["answers"].append({
+                    "answer_id": answer.id,
+                    "text": answer.text,
+                    "is_right": answer.is_right
+                })
+        
         return {
             "blitz_poll_id": blitz_poll.id,
-            "questions_count": len(blitz_questions)
+            "user_id": user_id,
+            "questions": list(questions_data.values())
         }, None
     
     async def get_blitz_poll_detail(self, blitz_poll_id: int, user_id: int):
@@ -48,6 +69,8 @@ class BlitzService:
                 questions_data[question.id] = {
                     "question_id": question.id,
                     "text": question.text,
+                    "gems": blitz_question.gems,
+                    "expirience": blitz_question.expirience,
                     "answers": []
                 }
             
@@ -102,14 +125,15 @@ class BlitzService:
             if not answer:
                 return None, "Ответ не найден или не соответствует указанному вопросу"
             
-            is_correct = answer.is_right
-            gems_earned = 0
-            expirience_earned = 0
-            
+            is_correct = answer.is_right   
+                    
             if is_correct:
                 gems_earned = blitz_question.gems
                 expirience_earned = blitz_question.expirience
                 await self.user_repo.add_gems_and_experience_blitz(user_id, gems_earned, expirience_earned)
+                blitz_poll.gems_earned += gems_earned
+                blitz_poll.expirience_earned += expirience_earned
+                await self.db.flush()
             
             await self.blitz_poll_repo.mark_question_as_answered(blitz_question)
             
@@ -118,8 +142,8 @@ class BlitzService:
             
             answer_result = AnswerResult(
                 is_correct=is_correct,
-                gems_earned=gems_earned,
-                expirience_earned=expirience_earned,
+                gems_earned=blitz_poll.gems_earned,
+                expirience_earned=blitz_poll.expirience_earned,
                 poll_completed=False
             )
             

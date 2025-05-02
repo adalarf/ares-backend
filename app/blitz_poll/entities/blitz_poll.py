@@ -95,10 +95,44 @@ class AnswerRequest(BaseModel):
     answer_id: int
 
 
+class BlitzPollProgress(BaseModel):
+    answered: int
+    total: int
+    remaining: int
+
+
+class BlitzPollStats(BaseModel):
+    total_gems: int
+    total_expirience: int
+    total_questions: int
+    correct_answers: int
+    accuracy_percentage: float  
+
+
 class AnswerResult(BaseModel):
     is_correct: bool
     gems_earned: int
     expirience_earned: int
     poll_completed: bool
-    progress: Optional[dict] = None
-    poll_stats: Optional[dict] = None
+    progress: Optional[BlitzPollProgress] = None
+    poll_stats: Optional[BlitzPollStats] = None
+
+
+class AnswerItemResponse(BaseModel):
+    answer_id: int
+    text: str
+    is_right: bool
+
+
+class QuestionItemResponse(BaseModel):
+    question_id: int
+    text: str
+    gems: int
+    expirience: int
+    answers: List[AnswerItemResponse]
+
+
+class BlitzPollDetailResponse(BaseModel):
+    blitz_poll_id: int
+    user_id: int
+    questions: List[QuestionItemResponse]

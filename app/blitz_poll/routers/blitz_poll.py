@@ -4,13 +4,18 @@ from app.database import get_async_session
 from app.auth.services.auth_service import get_current_user
 from app.auth.entities.user import User
 from app.blitz_poll.services.blitz_service import BlitzService
-from app.blitz_poll.entities.blitz_poll import AnswerRequest, QuestionCreate
+from app.blitz_poll.entities.blitz_poll import (
+    AnswerRequest, 
+    QuestionCreate, 
+    BlitzPollDetailResponse,
+    AnswerResult
+)
 
 
 router = APIRouter()
 
 
-@router.post("/blitz_poll", status_code=status.HTTP_201_CREATED)
+@router.post("/blitz_poll", response_model=BlitzPollDetailResponse, status_code=status.HTTP_201_CREATED)
 async def create_blitz_poll(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_session)
@@ -27,7 +32,7 @@ async def create_blitz_poll(
     return result
 
 
-@router.get("/blitz_poll/{blitz_poll_id}", status_code=status.HTTP_200_OK)
+@router.get("/blitz_poll/{blitz_poll_id}", response_model=BlitzPollDetailResponse, status_code=status.HTTP_200_OK)
 async def get_blitz_poll(
     blitz_poll_id: int,
     current_user: User = Depends(get_current_user),
@@ -62,7 +67,7 @@ async def get_question(
     return result
 
 
-@router.post("/answer", status_code=status.HTTP_200_OK)
+@router.post("/answer", response_model=AnswerResult, status_code=status.HTTP_200_OK)
 async def submit_answer(
     answer_request: AnswerRequest,
     current_user: User = Depends(get_current_user),
@@ -82,7 +87,7 @@ async def submit_answer(
             detail=error
         )
     
-    return result.dict()
+    return result
 
 
 @router.post("/question", status_code=status.HTTP_201_CREATED)
