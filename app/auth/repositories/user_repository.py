@@ -21,11 +21,11 @@ class UserRepository:
 
 
     async def get_by_id(self, user_id: int) -> Optional[User]:
-        query = select(UserModel).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         if user:
-            return User.model_validate(user)
+            return User.from_orm(user)
         return None
 
 
