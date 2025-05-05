@@ -37,11 +37,16 @@ class UserRepository:
         self.db.add(db_user)
         await self.db.commit()
         await self.db.refresh(db_user)
-        return User.from_orm(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == db_user.id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)
 
 
     async def update_user(self, user_id: int, user_update: UserUpdate) -> Optional[User]:
-        query = select(UserModel).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         
@@ -54,7 +59,12 @@ class UserRepository:
 
         await self.db.commit()
         await self.db.refresh(db_user)
-        return User.from_orm(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)
 
 
     async def add_gems_and_experience_blitz(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
@@ -67,11 +77,16 @@ class UserRepository:
         db_user.expirience = (db_user.expirience or 0) + expirience
         await self.db.commit()
         await self.db.refresh(db_user)
-        return User.from_orm(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.blitz_polls), selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)
     
 
     async def add_gems_and_experience(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
-        query = select(UserModel).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -80,3 +95,9 @@ class UserRepository:
         db_user.expirience = (db_user.expirience or 0) + expirience
         await self.db.commit()
         await self.db.refresh(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)

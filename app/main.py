@@ -5,6 +5,7 @@ from app.nutrition.routers import nutrition
 from app.blitz_poll.routers import blitz_poll
 from .tasks import setup_periodic_tasks
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
 
 app = FastAPI(title="ARES Backend")
@@ -29,3 +30,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0",port=8000)  
