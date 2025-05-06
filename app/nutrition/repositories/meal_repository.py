@@ -8,14 +8,15 @@ class MealRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, plan_id: int, dish_id: int, grams: float, proteins: float, fats: float, carbs: float) -> MealModel:
+    async def create(self, plan_id: int, dish_id: int, grams: float, proteins: float, fats: float, carbs: float, is_eaten: bool = False) -> MealModel:
         meal = MealModel(
             plan_id=plan_id,
             dish_id=dish_id,
             grams=grams,
             proteins=proteins,
             fats=fats,
-            carbs=carbs
+            carbs=carbs,
+            is_eaten=is_eaten
         )
         self.db.add(meal)
         await self.db.commit()
@@ -33,4 +34,3 @@ class MealRepository:
         query = select(MealModel).options(selectinload(MealModel.dish)).where(MealModel.id == id)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
-    
