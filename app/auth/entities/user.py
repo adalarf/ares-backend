@@ -39,6 +39,7 @@ class UserUpdate(BaseModel):
     gender: Optional[GenderEnum] = None
     goal: Optional[GoalEnum] = None
     activity: Optional[ActivityEnum] = None
+    age: Optional[int] = None
     weight: Optional[float] = None
     height: Optional[float] = None
     training_place: Optional[TrainingPlaceEnum] = None
