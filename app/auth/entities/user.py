@@ -54,3 +54,15 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+class UserInfo(BaseModel):
+    id: int
+    gems: int
+    level: int
+    experience_to_next_level: int
+    experience_current: int
+
+
+class CaloriesInfo(BaseModel):
+    body_mass_index: float

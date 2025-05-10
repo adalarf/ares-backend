@@ -27,7 +27,16 @@ class UserRepository:
         if user:
             return User.from_orm(user)
         return None
+    
 
+
+    async def get_user(self, user_id: int) -> Optional[UserModel]:
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        user = result.scalar_one_or_none()
+        return user
+
+    
 
     async def create(self, user: UserCreate, hashed_password: str) -> User:
         db_user = UserModel(

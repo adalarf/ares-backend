@@ -6,13 +6,14 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from app.auth.repositories.user_repository import UserRepository
 from app.auth.repositories.token_repository import TokenRepository
-from app.auth.entities.user import User, UserCreate, UserLogin, Token, UserUpdate
+from app.auth.entities.user import User, UserCreate, UserLogin, Token, UserUpdate, UserInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_async_session
 from app.config import SECRET_KEY, ALGORITHM
 from app.auth.models.user import UserModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+import math
 
 
 
@@ -143,6 +144,51 @@ class AuthService:
             )
         return updated_user
     
+
+    async def calculate_bmr(weight: float, height: float, age: int, gender: str):
+        gender_coeff = 5 if gender == "male" else -161
+        bmr = 10 * weight + 6.25 * height - 5 * age + gender_coeff
+        return bmr
+    
+
+    async def calculate_tdee(bmr: float, activity_level: str):
+        activity_coefficients = {
+            "low": 1.2,
+            "middle": 1.55,
+            "high": 1.9
+        }
+        tdee = bmr * activity_coefficients.get(activity_level, 1.2)
+        return tdee
+    
+
+    async def calculate_tef(tdee: float):
+        tef = tdee / 0.9
+        return tef
+    
+
+    async def get_user_info(self, user_id: int) -> UserInfo:
+        user = await self.user_repository.get_user(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        level = math.floor((user.expirience / 50) ** 0.5) + 1
+        experience_to_next_level = level ** 2 * 50
+        user_info = UserInfo(
+            id=user.id,
+            gems=user.gems,
+            level=level,
+            experience_to_next_level=experience_to_next_level,
+            experience_current=user.expirience
+        )
+
+        return user_info
+
+
+    async def get_body_mass_index(self, weight: float, height: float) -> float:
+        bmi = weight / ((height / 100) ** 2)
+        return bmi
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
