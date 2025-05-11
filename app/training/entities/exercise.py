@@ -10,7 +10,7 @@ class ExerciseCreation(BaseModel):
     gems_default: int
     expirience_default: int
     expirience_level: str
-    intensity: str | None = None
+    intensity: str
     kg50_calories: float | None = None
     kg60_calories: float | None = None
     kg70_calories: float | None = None

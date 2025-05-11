@@ -59,7 +59,9 @@ class ExerciseRepository:
     async def create(self, name: str, sets_number_default: int, 
                      repetitions_default: int, training_place: str, 
                      gems_default: int, expirience_level: str, 
-                     muscle_group_id: int, expirience_default: int) -> ExerciseModel:
+                     muscle_group_id: int, expirience_default: int,
+                     intensity: str, kg50_calories: float, kg60_calories: float, kg70_calories: float,
+                     kg80_calories: float, kg90_calories: float, kg100_calories: float) -> ExerciseModel:
         exercise = ExerciseModel(
             name=name,
             training_place=training_place,
@@ -68,7 +70,14 @@ class ExerciseRepository:
             gems_default=gems_default,
             expirience_default=expirience_default,
             expirience_level=expirience_level,
-            muscle_group_id=muscle_group_id
+            muscle_group_id=muscle_group_id,
+            intensity=intensity,
+            kg50_calories=kg50_calories,
+            kg60_calories=kg60_calories,
+            kg70_calories=kg70_calories,
+            kg80_calories=kg80_calories,
+            kg90_calories=kg90_calories,
+            kg100_calories=kg100_calories
         )
         self.db.add(exercise)
         await self.db.commit()

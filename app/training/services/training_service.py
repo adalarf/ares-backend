@@ -259,25 +259,45 @@ class TrainingService:
     async def create_exercises(self, exercises_data: list[ExerciseCreation]):
         created_exercises = []
         for exercise_data in exercises_data:
-            existing_exercise = await self.exercise_repo.get_by_name(exercise_data.name)
-            if not existing_exercise:
-                created_exercise = await self.exercise_repo.create(
-                    name=exercise_data.name,
-                    training_place=exercise_data.training_place,
-                    muscle_group_id=exercise_data.muscle_group_id,
-                    sets_number_default=exercise_data.sets_number_default,
-                    repetitions_default=exercise_data.repetitions_default,
-                    gems_default=exercise_data.gems_default,
-                    expirience_level=exercise_data.expirience_level,
-                    expirience_default=exercise_data.expirience_default
-                )
-                created_exercises.append(created_exercise)
+            # existing_exercise = await self.exercise_repo.get_by_name(exercise_data.name)
+            # if not existing_exercise:
+            created_exercise = await self.exercise_repo.create(
+                name=exercise_data.name,
+                training_place=exercise_data.training_place,
+                muscle_group_id=exercise_data.muscle_group_id,
+                sets_number_default=exercise_data.sets_number_default,
+                repetitions_default=exercise_data.repetitions_default,
+                gems_default=exercise_data.gems_default,
+                expirience_level=exercise_data.expirience_level,
+                expirience_default=exercise_data.expirience_default,
+                intensity=exercise_data.intensity,
+                kg50_calories=exercise_data.kg50_calories,
+                kg60_calories=exercise_data.kg60_calories,
+                kg70_calories=exercise_data.kg70_calories,
+                kg80_calories=exercise_data.kg80_calories,
+                kg90_calories=exercise_data.kg90_calories,
+                kg100_calories=exercise_data.kg100_calories,
+            )
+            created_exercises.append(created_exercise)
         return [
             ExerciseResponse(
                 id=exercise.id,
                 name=exercise.name,
                 training_place=exercise.training_place,
-                muscle_group_id=exercise.muscle_group_id
+                muscle_group_id=exercise.muscle_group_id,
+                sets_number_default=exercise.sets_number_default,
+                repetitions_default=exercise.repetitions_default,
+                gems_default=exercise.gems_default,
+                expirience_level=exercise.expirience_level,
+                expirience_default=exercise.expirience_default,
+                intensity=exercise.intensity,
+                kg50_calories=exercise.kg50_calories,
+                kg60_calories=exercise.kg60_calories,
+                kg70_calories=exercise.kg70_calories,
+                kg80_calories=exercise.kg80_calories,
+                kg90_calories=exercise.kg90_calories,
+                kg100_calories=exercise.kg100_calories,
+                image=exercise.image
             )
             for exercise in created_exercises
         ]
