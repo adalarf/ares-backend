@@ -52,9 +52,16 @@ class UserModel(Base):
     training_place = Column(Enum(TrainingPlaceEnum), nullable=True)
     load = Column(Enum(LoadEnum), nullable=True)
     workout_week_days = Column(Integer, default=3)
+    intensity = Column(String, nullable=True, default="low")
 
     gems = Column(Integer, default=0)
     expirience = Column(Integer, default=0)
+
+    calories_burned_daily = Column(Float, default=0)
+    calories_eaten_daily = Column(Float, default=0)
+    proteins_eaten_daily = Column(Float, default=0)
+    fats_eaten_daily = Column(Float, default=0)
+    carbs_eaten_daily = Column(Float, default=0)
 
     tokens = relationship("TokenModel", back_populates="user", cascade="all, delete")
     workout_plans = relationship("WorkoutPlanModel", back_populates="user", cascade="all, delete")

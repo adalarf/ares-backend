@@ -9,6 +9,7 @@ from app.nutrition.repositories.dish_repository import DishRepository
 from app.nutrition.repositories.ingredient_repository import IngredientRepository
 from app.nutrition.repositories.meal_plan_repository import MealPlanRepository
 from app.nutrition.repositories.meal_repository import MealRepository
+from app.auth.repositories.user_repository import UserRepository
 from app.auth.entities.user import User
 
 
@@ -19,7 +20,8 @@ def get_nutrition_service(db: AsyncSession = Depends(get_async_session)) -> Nutr
     ingredient_repo = IngredientRepository(db)
     meal_plan_repo = MealPlanRepository(db)
     meal_repo = MealRepository(db)
-    return NutritionService(dish_repo, ingredient_repo, meal_plan_repo, meal_repo)
+    user_repo = UserRepository(db)
+    return NutritionService(dish_repo, ingredient_repo, meal_plan_repo, meal_repo, user_repo)
 
 
 @router.post("/generate_meal_plan", response_model=MealPlanRead)

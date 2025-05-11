@@ -6,6 +6,7 @@ from app.nutrition.repositories.dish_repository import DishRepository
 from app.nutrition.repositories.ingredient_repository import IngredientRepository
 from app.nutrition.repositories.meal_plan_repository import MealPlanRepository
 from app.nutrition.repositories.meal_repository import MealRepository
+from app.auth.repositories.user_repository import UserRepository
 from typing import Dict, List
 import random
 
@@ -14,11 +15,13 @@ class NutritionService:
     def __init__(self, dish_repo: DishRepository, 
                  ingredient_repo: IngredientRepository,
                  meal_plan_repo: MealPlanRepository,
-                 meal_repo: MealRepository):
+                 meal_repo: MealRepository,
+                 user_repo: UserRepository):
         self.dish_repo = dish_repo
         self.ingredient_repo = ingredient_repo
         self.meal_plan_repo = meal_plan_repo
         self.meal_repo = meal_repo
+        self.user_repo = user_repo
 
 
     def calculate_bmr(self, gender: str, goal: str, age: int, weight: float, height: float) -> float:
@@ -158,4 +161,20 @@ class NutritionService:
         await self.meal_repo.make_eaten(id)
 
         meal = await self.meal_repo.get_by_id(id)
+        await self.user_repo.increase_calories(id, meal.grams, meal.proteins, meal.fats, meal.carbs)
+
         return meal
+
+
+    async def get_calories_info(self, user_id: int):
+        user = await self.user_repo.get_user(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "calories_burned": user.calories_burned_daily,
+            "calories_eaten": user.calories_eaten_daily,
+            "proteins_eaten": user.proteins_eaten_daily,
+            "fats_eaten": user.fats_eaten_daily,
+            "carbs_eaten": user.carbs_eaten_daily
+        }

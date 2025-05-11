@@ -55,11 +55,13 @@ class TrainingService:
                     repetitions=exercise.repetitions,
                     gems=exercise.gems,
                     expirience=exercise.expirience,
+                    calories=exercise.calories,
                     name=exercise.exercise.name,
                     image=exercise.exercise.image or ""
                 )
                 for exercise in planned_exercises
             ]
+            total_calories = sum(exercise.calories for exercise in planned_exercises)
             result_days.append(WorkoutDayInfo(
                 id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
@@ -68,7 +70,8 @@ class TrainingService:
                 muscle_group=workout_day.muscle_group.name,
                 is_active=workout_day.is_active,
                 is_completed=workout_day.is_completed,
-                exercises=exercises_info
+                exercises=exercises_info,
+                total_calories=total_calories
             ))
 
         return WeeklyWorkoutPlanResponse(
@@ -157,7 +160,8 @@ class TrainingService:
                 sets_number=exercise.sets_number_default,
                 repetitions=exercise.repetitions_default,
                 gems=exercise.gems_default,
-                expirience=exercise.expirience_default
+                expirience=exercise.expirience_default,
+                calories=exercise.kg50_calories,
             )
             await self.planned_exercise_repo.create(planned_exercise)
 
@@ -203,12 +207,15 @@ class TrainingService:
                     repetitions=exercise.repetitions,
                     gems=exercise.gems,
                     expirience=exercise.expirience,
+                    calories=exercise.calories,
                     is_active=exercise.is_active,
                     name=exercise.exercise.name,
                     image=exercise.exercise.image or ""
                 )
                 for exercise in planned_exercises
             ]
+            total_calories = sum(exercise.calories for exercise in planned_exercises)
+
             days_info.append(WorkoutDayInfo(
                 id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
@@ -217,7 +224,8 @@ class TrainingService:
                 muscle_group=workout_day.muscle_group.name,
                 is_active=workout_day.is_active,
                 is_completed=workout_day.is_completed,
-                exercises=exercises_info
+                exercises=exercises_info,
+                total_calories=total_calories
             ))
 
         return WeeklyWorkoutPlanResponse(
@@ -311,7 +319,8 @@ class TrainingService:
             sets_number=exercise.sets_number_default,
             repetitions=exercise.repetitions_default,
             gems=exercise.gems_default,
-            expirience=exercise.expirience_default
+            expirience=exercise.expirience_default,
+            calories=exercise.kg50_calories
         )
         random_exercise = await self.random_exercise_repo.create(random_exercise)
 
@@ -322,6 +331,7 @@ class TrainingService:
             repetitions=random_exercise.repetitions,
             gems=random_exercise.gems,
             expirience=random_exercise.expirience,
+            calories=random_exercise.calories,
             name=random_exercise.exercise.name,
             image=random_exercise.exercise.image or ""
         )
@@ -339,6 +349,7 @@ class TrainingService:
             repetitions=random_exercise.repetitions,
             gems=random_exercise.gems,
             expirience=random_exercise.expirience,
+            calories=random_exercise.calories,
             name=random_exercise.exercise.name,
             image=random_exercise.exercise.image or ""
         )
@@ -350,6 +361,7 @@ class TrainingService:
             raise ValueError(f"Planned exercise with ID {planned_exercise_id} not found.")
         await self.planned_exercise_repo.update(planned_exercise.id)
         await self.user_repo.add_gems_and_experience(user.id, planned_exercise.gems, planned_exercise.expirience)
+        await self.user_repo.increase_burned_calories(user.id, planned_exercise.calories)
 
         if not self.workout_day_repo.has_active_planned_exercise(planned_exercise.workout_day_id):
             await self.workout_day_repo.deactivate_workout_day(planned_exercise.workout_day_id)
@@ -362,7 +374,10 @@ class TrainingService:
         if not random_exercise:
             raise ValueError(f"Random exercise with ID {random_exercise_id} not found.")
         await self.user_repo.add_gems_and_experience(user.id, random_exercise.gems, random_exercise.expirience)
+        await self.user_repo.increase_burned_calories(user.id, random_exercise.calories)
+
         await self.random_exercise_repo.delete(random_exercise_id)
+        
 
         return random_exercise
     

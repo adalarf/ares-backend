@@ -23,7 +23,8 @@ class PlannedExerciseRepository:
             sets_number=planned_exercise.sets_number,
             repetitions=planned_exercise.repetitions,
             gems=planned_exercise.gems,
-            expirience=planned_exercise.expirience
+            expirience=planned_exercise.expirience,
+            calories=planned_exercise.calories
         )
         self.db.add(planned_exercise_model)
         await self.db.commit()

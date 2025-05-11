@@ -35,6 +35,7 @@ class ExerciseInfo(BaseModel):
     repetitions: int
     gems: int
     expirience: int
+    calories: float
     is_active: bool
     name: str
     image: Optional[str] = None
@@ -49,6 +50,7 @@ class WorkoutDayInfo(BaseModel):
     is_active: bool
     is_completed: bool
     exercises: List[ExerciseInfo]
+    total_calories: float
 
 
 class WeeklyWorkoutPlanResponse(BaseModel):

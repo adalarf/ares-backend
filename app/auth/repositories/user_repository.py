@@ -29,14 +29,12 @@ class UserRepository:
         return None
     
 
-
     async def get_user(self, user_id: int) -> Optional[UserModel]:
         query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         return user
 
-    
 
     async def create(self, user: UserCreate, hashed_password: str) -> User:
         db_user = UserModel(
@@ -102,6 +100,44 @@ class UserRepository:
             return None
         db_user.gems = (db_user.gems or 0) + gems
         db_user.expirience = (db_user.expirience or 0) + expirience
+        await self.db.commit()
+        await self.db.refresh(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)
+    
+
+    async def increase_burned_calories(self, user_id: int, burned_calories: int) -> Optional[User]:
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        db_user = result.scalar_one_or_none()
+        if not db_user:
+            return None
+        db_user.calories_burned_daily = (db_user.calories_burned_daily or 0) + burned_calories
+        await self.db.commit()
+        await self.db.refresh(db_user)
+        
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        refreshed_user = result.scalar_one_or_none()
+        
+        return User.model_validate(refreshed_user)
+    
+
+    async def increase_calories(self, user_id: int, calories: float, proteins: float,
+                                fats: float, carbs: float) -> Optional[User]:
+        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        db_user = result.scalar_one_or_none()
+        if not db_user:
+            return None
+        db_user.calories_eaten_daily = (db_user.calories_eaten_daily or 0) + calories
+        db_user.proteins_eaten_daily = (db_user.proteins_eaten_daily or 0) + proteins
+        db_user.fats_eaten_daily = (db_user.fats_eaten_daily or 0) + fats
+        db_user.carbs_eaten_daily = (db_user.carbs_eaten_daily or 0) + carbs
         await self.db.commit()
         await self.db.refresh(db_user)
         

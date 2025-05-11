@@ -9,6 +9,7 @@ class RandomExerciseCreation(BaseModel):
     expirience:int 
     exercise_id:int
     user_id: int
+    calories: float
 
 
 class RandomExerciseInfo(BaseModel):
@@ -18,5 +19,6 @@ class RandomExerciseInfo(BaseModel):
     repetitions: int
     gems: int
     expirience: int
+    calories: float
     name: str
     image: Optional[str] = None

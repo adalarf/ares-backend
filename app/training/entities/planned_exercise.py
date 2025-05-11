@@ -15,6 +15,7 @@ class PlannedExerciseCreation(BaseModel):
     repetitions: int
     gems: int
     expirience: int
+    calories: float
 
 
 class PlannedExerciseResponse(BaseModel):
