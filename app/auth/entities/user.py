@@ -44,6 +44,7 @@ class UserUpdate(BaseModel):
     height: Optional[float] = None
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
+    intensity: Optional[str] = None
 
 
 class Token(BaseModel):
