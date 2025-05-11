@@ -10,6 +10,14 @@ class ExerciseCreation(BaseModel):
     gems_default: int
     expirience_default: int
     expirience_level: str
+    intensity: str | None = None
+    kg50_calories: float | None = None
+    kg60_calories: float | None = None
+    kg70_calories: float | None = None
+    kg80_calories: float | None = None
+    kg90_calories: float | None = None
+    kg100_calories: float | None = None
+
 
 
 class ExerciseResponse(BaseModel):
@@ -24,6 +32,13 @@ class ExerciseResponse(BaseModel):
     gems_default: int
     expirience_default: int
     expirience_level: str
+    intensity: str | None = None
+    kg50_calories: float | None = None
+    kg60_calories: float | None = None
+    kg70_calories: float | None = None
+    kg80_calories: float | None = None
+    kg90_calories: float | None = None
+    kg100_calories: float | None = None
 
     class Config:
         orm_mode = True
