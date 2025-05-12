@@ -85,24 +85,24 @@ async def buy_clothes(
 
 
 @router.get("/get_items", response_model=ItemsInfo)
-async def get_user_items(
+async def get_items_list(
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    user_items = await auth_service.get_items()
-    if not user_items:
+    db_items = await auth_service.get_items()
+    if not db_items:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Items not found")
-    user_items = []
-    for user_item in user_items:
-        item = ItemInfo(
-            id=user_item.id,
-            name=user_item.name,
-            description=user_item.description,
-            price=user_item.price,
-            path=user_item.path
-        )
-        user_items.append(item)
-    user_items = ItemsInfo(items=user_items)
-    return user_items
+    
+    items_list = []
+    for item in db_items:
+        items_list.append(ItemInfo(
+            id=item.id,
+            name=item.name,
+            path=item.path or "",
+            price=int(item.price),
+            rarity=item.rarity or ""
+        ))
+    
+    return ItemsInfo(items=items_list)
 
 
 @router.get("/get_user_items", response_model=ItemsInfo)
