@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.auth.models.item import ItemModel
+from sqlalchemy.orm import selectinload
+from app.auth.models.user import UserModel
 
 
 class ItemRepository:
@@ -22,3 +24,18 @@ class ItemRepository:
             {"user_id": user_id, "item_id": item_id}
         )
         await self.db.commit()
+
+    
+
+    async def get_all(self) -> list[ItemModel]:
+        query = select(ItemModel)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+        
+    async def get_items_by_user_id(self, user_id: int) -> list[ItemModel]:
+        query = select(UserModel).options(selectinload(UserModel.items)).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        user = result.scalar_one_or_none()
+        
+        return user.items if user else []
+    

@@ -4,6 +4,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends  
 from fastapi.security import OAuth2PasswordBearer
+from app.auth.models.item import ItemModel
 from app.auth.repositories.user_repository import UserRepository
 from app.auth.repositories.token_repository import TokenRepository
 from app.auth.repositories.item_repository import ItemRepository
@@ -235,6 +236,23 @@ class AuthService:
         user.avatar = path
         await self.user_repository.update_user(user.id, user)
         return user
+    
+
+    async def get_items(self) -> list[ItemModel]:        
+        items = await self.item_repository.get_all()
+        return items
+    
+
+    async def get_user_items(self, user_id: int) -> list[ItemModel]:
+        user = await self.user_repository.get_user(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        user_items = await self.item_repository.get_items_by_user_id(user_id)
+        return user_items
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
