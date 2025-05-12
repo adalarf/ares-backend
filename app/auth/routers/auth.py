@@ -5,6 +5,7 @@ from app.auth.repositories.user_repository import UserRepository
 from app.auth.services.auth_service import AuthService
 from app.auth.entities.user import UserCreate, UserLogin, Token
 from app.auth.repositories.token_repository import TokenRepository
+from app.auth.repositories.item_repository import ItemRepository
 
 
 router = APIRouter()
@@ -13,7 +14,8 @@ router = APIRouter()
 def get_auth_service(db: AsyncSession = Depends(get_async_session)) -> AuthService:
     user_repository = UserRepository(db)
     token_repository = TokenRepository(db)
-    return AuthService(user_repository, token_repository)
+    item_repository = ItemRepository(db)
+    return AuthService(user_repository, token_repository, item_repository)
 
 
 @router.post("/register", response_model=Token)
