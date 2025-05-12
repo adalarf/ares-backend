@@ -50,7 +50,7 @@ async def get_calories_info(
     return CaloriesInfo(body_mass_index=body_mass_index)
 
 
-@router.get("/set_avatar")
+@router.post("/set_avatar")
 async def set_user_avatar(
     avatar_url: AvatarUrl,
     current_user: User = Depends(get_current_user),
