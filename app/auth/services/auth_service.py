@@ -232,10 +232,17 @@ class AuthService:
         return user
     
 
-    async def set_user_avatar(self, user: UserModel, path: str) -> UserModel:
-        user.avatar = path
-        await self.user_repository.update_user(user.id, user)
-        return user
+    async def set_user_avatar(self, user_data: User, path: str) -> User:
+        user = await self.user_repository.get_user(user_data.id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        user_update = UserUpdate(avatar=path)
+        updated_user = await self.user_repository.update_user(user.id, user_update)
+        return updated_user
     
 
     async def get_items(self) -> list[ItemModel]:        

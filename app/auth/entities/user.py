@@ -20,6 +20,7 @@ class User(BaseModel):
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
     restrictions: Optional[list[str]] = None
+    avatar: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -45,6 +46,7 @@ class UserUpdate(BaseModel):
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
     intensity: Optional[str] = None
+    avatar: Optional[str] = None
 
 
 class Token(BaseModel):
