@@ -11,9 +11,11 @@ sys.path.append(os.path.join(sys.path[0], 'app'))
 from app.nutrition.models.user_restriction import user_restriction
 from app.nutrition.models.dish_ingredient import dish_ingredient
 from app.nutrition.models.dish_restriction import dish_restriction
+from app.auth.models.user_item import user_item
 from app.nutrition.models.restriction import RestrictionModel
 from app.auth.models.user import UserModel
 from app.auth.models.token import TokenModel
+from app.auth.models.item import ItemModel
 from app.training.models.exercise_type import ExerciseTypeModel
 from app.training.models.exercise import ExerciseModel
 from app.training.models.workout_plan import WorkoutPlanModel

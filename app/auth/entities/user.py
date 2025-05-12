@@ -67,3 +67,7 @@ class UserInfo(BaseModel):
 
 class CaloriesInfo(BaseModel):
     body_mass_index: float
+
+
+class AvatarUrl(BaseModel):
+    avatar_url: str

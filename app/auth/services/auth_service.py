@@ -6,6 +6,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from app.auth.repositories.user_repository import UserRepository
 from app.auth.repositories.token_repository import TokenRepository
+from app.auth.repositories.item_repository import ItemRepository
 from app.auth.entities.user import User, UserCreate, UserLogin, Token, UserUpdate, UserInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_async_session
@@ -21,9 +22,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository, token_repository: TokenRepository):
+    def __init__(self, user_repository: UserRepository, token_repository: TokenRepository,
+                 item_repository: ItemRepository):
         self.user_repository = user_repository
         self.token_repository = token_repository
+        self.item_repository = item_repository
 
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -189,6 +192,49 @@ class AuthService:
     async def get_body_mass_index(self, weight: float, height: float) -> float:
         bmi = weight / ((height / 100) ** 2)
         return bmi
+    
+
+    async def get_user_avatar(self, user_id: int) -> str:
+        user = await self.user_repository.get_user(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        return user.avatar
+    
+    
+    async def buy_clothes(self, user_id: int, item_id: int) -> User:
+        user = await self.user_repository.get_user(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        item = await self.item_repository.get_by_id(item_id)
+        if not item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Item not found"
+            )
+        
+        if user.gems < item.price:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Not enough gems"
+            )
+        
+        user.gems -= item.price
+        user.avatar = item.path
+        await self.user_repository.update_user(user_id, user)
+        return user
+    
+
+    async def set_user_avatar(self, user: UserModel, path: str) -> UserModel:
+        user.avatar = path
+        await self.user_repository.update_user(user.id, user)
+        return user
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),

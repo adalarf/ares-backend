@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.nutrition.models.user_restriction import user_restriction
+from app.auth.models.user_item import user_item
 import enum
 
 
@@ -56,6 +57,7 @@ class UserModel(Base):
 
     gems = Column(Integer, default=0)
     expirience = Column(Integer, default=0)
+    avatar = Column(String, nullable=True)
 
     calories_burned_daily = Column(Float, default=0)
     calories_eaten_daily = Column(Float, default=0)
@@ -72,6 +74,11 @@ class UserModel(Base):
         back_populates="users"
     )
     blitz_polls = relationship("BlitzPollModel", back_populates="user", cascade="all, delete")
+    items = relationship(
+        "ItemModel",
+        secondary=user_item,
+        back_populates="users"
+    )
     # restriction_details = relationship(
     #     "UserRestrictionModel",
     #     back_populates="user"
