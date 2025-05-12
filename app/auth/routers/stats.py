@@ -86,10 +86,9 @@ async def buy_clothes(
 
 @router.get("/get_items", response_model=ItemsInfo)
 async def get_user_items(
-    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    user_items = await auth_service.get_items(current_user.id)
+    user_items = await auth_service.get_items()
     if not user_items:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Items not found")
     user_items = []
