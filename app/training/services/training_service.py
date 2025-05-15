@@ -308,7 +308,7 @@ class TrainingService:
             exercises = await self.exercise_repo.get_by_muscle_group_id(muscle_group_id)
             # exercises = [e for e in exercises if e.muscle_group_id == muscle_group_id]
         else:
-            exercises = await self.exercise_repo.get_all()
+            exercises = await self.exercise_repo.get_with_distinct_names()
         return [
             ExerciseResponse(
                 id=exercise.id,

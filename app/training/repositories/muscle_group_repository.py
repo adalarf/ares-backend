@@ -42,7 +42,7 @@ class ExerciseRepository:
 
     
     async def get_by_muscle_group_id(self, id: int) -> list[ExerciseModel] | None:
-        query = select(ExerciseModel).where(ExerciseModel.muscle_group_id == id)
+        query = select(ExerciseModel).where(ExerciseModel.muscle_group_id == id, ExerciseModel.intensity == "low")
         result = await self.db.execute(query)
         return result.scalars().all()
 
@@ -87,6 +87,12 @@ class ExerciseRepository:
 
     async def get_all(self) -> list[ExerciseModel]:
         query = select(ExerciseModel)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+
+    async def get_with_distinct_names(self) -> list[ExerciseModel]:
+        query = select(ExerciseModel).distinct(ExerciseModel.name).order_by(ExerciseModel.name)
         result = await self.db.execute(query)
         return result.scalars().all()
 
