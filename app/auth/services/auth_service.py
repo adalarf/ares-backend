@@ -220,13 +220,13 @@ class AuthService:
                 detail="Item not found"
             )
         
-        if user.gems < item.price:
+        if user.gems < int(item.price):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Not enough gems"
             )
         
-        user.gems -= item.price
+        user.gems -= int(item.price)
         user.avatar = item.path
         await self.user_repository.update_user(user_id, user)
         return user
