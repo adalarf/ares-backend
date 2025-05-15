@@ -225,11 +225,17 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Not enough gems"
             )
-        
         user.gems -= int(item.price)
-        user.avatar = item.path
-        await self.user_repository.update_user(user_id, user)
-        return user
+        
+        user_update = UserUpdate(
+            gems=user.gems,
+            avatar=item.path
+        )
+        
+        updated_user = await self.user_repository.update_user(user_id, user_update)
+        await self.item_repository.add_item_to_user(user_id, item_id)
+        
+        return updated_user
     
 
     async def set_user_avatar(self, user_data: User, path: str) -> User:
