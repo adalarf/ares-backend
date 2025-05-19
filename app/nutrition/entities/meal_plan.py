@@ -40,6 +40,11 @@ class MealPlanRead(BaseModel):
     proteins: float
     fats: float
     carbs: float
+    calories_burned: float = 0.0
+    calories_eaten: float = 0.0
+    proteins_eaten: float = 0.0
+    fats_eaten: float = 0.0
+    carbs_eaten: float = 0.0
     meals: List[MealRead]
 
     class Config:

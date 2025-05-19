@@ -9,6 +9,7 @@ class MealModel(Base):
     plan_id = Column(Integer, ForeignKey("meal_plans.id"))
     dish_id = Column(Integer, ForeignKey("dishes.id"))
     grams = Column(Float)
+    calories = Column(Float)
     proteins = Column(Float)
     fats = Column(Float)
     carbs = Column(Float)

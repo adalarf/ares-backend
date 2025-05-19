@@ -30,16 +30,18 @@ class PlannedExerciseRepository:
         await self.db.commit()
         await self.db.refresh(planned_exercise_model)
         return planned_exercise_model
-    
+        
 
-    async def update(self, planned_exercise_id: int):     
-        query = (
-            update(PlannedExerciseModel)
-            .where(PlannedExerciseModel.id == planned_exercise_id)
-            .values(is_active=False)
-        )
-        await self.db.execute(query)
+    async def update(self, planned_exercise_id: int, update_data: dict = None) -> PlannedExerciseModel | None:
+        if update_data is None:
+            update_data = {"is_active": False}
+            
+        query = update(PlannedExerciseModel).where(PlannedExerciseModel.id == planned_exercise_id).values(**update_data)
+        result = await self.db.execute(query)
+        if result.rowcount == 0:
+            return None
         await self.db.commit()
+        return await self.get_by_id(planned_exercise_id)
     
 
     async def delete(self, planned_exercise_id: int) -> None:

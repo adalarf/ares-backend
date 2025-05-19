@@ -76,7 +76,7 @@ class NutritionService:
     def select_dish(self, filtered_dishes: List[DishModel], meal_type: str) -> DishModel:
         suitable_dishes = [
             dish for dish in filtered_dishes 
-            if dish.category == meal_type
+            if dish.category.lower() == meal_type.lower()
         ]
 
         if not suitable_dishes:
@@ -96,7 +96,7 @@ class NutritionService:
         fats = dish.fats * calories_coefficient
         carbs = dish.carbs * calories_coefficient
 
-        return grams, proteins, fats, carbs
+        return grams, proteins, fats, carbs, meal_calories
 
 
     async def get_or_create_ingredient(self, name: str):
@@ -135,6 +135,7 @@ class NutritionService:
                 plan_id=plan.id,
                 dish_id=dish.id,
                 grams=meal["grams"],
+                calories=meal["calories"],
                 proteins=meal["proteins"],
                 fats=meal["fats"],
                 carbs=meal["carbs"],
@@ -154,17 +155,18 @@ class NutritionService:
         if not plan:
             raise HTTPException(status_code=404, detail="Meal plan not found")
         
-        return plan
-
-
+        return plan    
+    
+    
     async def make_meal_eaten(self, id: int):
         await self.meal_repo.make_eaten(id)
 
         meal = await self.meal_repo.get_by_id(id)
-        await self.user_repo.increase_calories(id, meal.grams, meal.proteins, meal.fats, meal.carbs)
+        user_id = meal.plan.user_id
+        await self.user_repo.increase_calories(user_id, meal.calories, meal.proteins, meal.fats, meal.carbs)
 
         return meal
-
+    
 
     async def get_calories_info(self, user_id: int):
         user = await self.user_repo.get_user(user_id)
@@ -172,9 +174,9 @@ class NutritionService:
             raise HTTPException(status_code=404, detail="User not found")
         
         return {
-            "calories_burned": user.calories_burned_daily,
-            "calories_eaten": user.calories_eaten_daily,
-            "proteins_eaten": user.proteins_eaten_daily,
-            "fats_eaten": user.fats_eaten_daily,
-            "carbs_eaten": user.carbs_eaten_daily
+            "calories_burned": user.calories_burned_daily or 0.0,
+            "calories_eaten": user.calories_eaten_daily or 0.0,
+            "proteins_eaten": user.proteins_eaten_daily or 0.0,
+            "fats_eaten": user.fats_eaten_daily or 0.0,
+            "carbs_eaten": user.carbs_eaten_daily or 0.0
         }

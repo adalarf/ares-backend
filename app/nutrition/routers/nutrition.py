@@ -42,18 +42,20 @@ async def generate_meal_plan(
     plan_data = []
     for meal_type, percentage in meal_distribution.items():
         dish = nutrition_service.select_dish(filtered_dishes, meal_type)
-        grams, proteins, fats, carbs = nutrition_service.calculate_grams(dish, percentage, calories)
+        grams, proteins, fats, carbs, meal_calories = nutrition_service.calculate_grams(dish, percentage, calories)
         plan_data.append({
             "meal": meal_type,
             "dish": dish.name,
             "grams": grams,
+            "calories": meal_calories,
             "proteins": proteins,
             "fats": fats,
             "carbs": carbs
         })
-
     plan, meals = await nutrition_service.create_meal_plan(current_user.id, plan_data)
-
+    
+    user_calories = await nutrition_service.get_calories_info(current_user.id)
+    
     return MealPlanRead(
         id=plan.id,
         user_id=plan.user_id,
@@ -61,6 +63,11 @@ async def generate_meal_plan(
         proteins=plan.proteins,
         fats=plan.fats,
         carbs=plan.carbs,
+        calories_burned=user_calories["calories_burned"],
+        calories_eaten=user_calories["calories_eaten"],
+        proteins_eaten=user_calories["proteins_eaten"],
+        fats_eaten=user_calories["fats_eaten"],
+        carbs_eaten=user_calories["carbs_eaten"],
         meals=[
             MealRead(
             id=meal.id,
@@ -88,6 +95,8 @@ async def get_meal_plan(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Meal plan not found"
         )
+    user_calories = await nutrition_service.get_calories_info(current_user.id)
+    
     return MealPlanRead(
         id=meal_plan.id,
         user_id=meal_plan.user_id,
@@ -95,6 +104,11 @@ async def get_meal_plan(
         proteins=meal_plan.proteins,
         fats=meal_plan.fats,
         carbs=meal_plan.carbs,
+        calories_burned=user_calories["calories_burned"],
+        calories_eaten=user_calories["calories_eaten"],
+        proteins_eaten=user_calories["proteins_eaten"],
+        fats_eaten=user_calories["fats_eaten"],
+        carbs_eaten=user_calories["carbs_eaten"],
         meals=[
             MealRead(
                 id=meal.id,

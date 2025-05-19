@@ -35,11 +35,12 @@ def get_training_service(db: AsyncSession = Depends(get_async_session)) -> Train
 
 @router.post("/workout_plan", response_model=WeeklyWorkoutPlanResponse)
 async def create_workout_plan(
-    workout_plan_data: WorkoutPlanCreation,
     current_user: User = Depends(get_current_user),
     training_service: TrainingService = Depends(get_training_service)
 ):
-    return await training_service.create_weekly_workout_plan(workout_plan_data, current_user.id)
+    return await training_service.create_weekly_workout_plan(current_user.id, 
+                                                             current_user.activity.value,
+                                                             current_user.training_place.value) 
 
 
 @router.get("/workout_plan", response_model=WeeklyWorkoutPlanResponse)

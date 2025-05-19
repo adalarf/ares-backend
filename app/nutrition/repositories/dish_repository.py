@@ -17,7 +17,6 @@ class DishRepository:
         if restrictions:
             query = query.where(~DishModel.restrictions.any(RestrictionModel.name.in_(restrictions)))
         result = await self.db.execute(query)
-
         return result.scalars().all()   
 
 
