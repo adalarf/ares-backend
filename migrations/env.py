@@ -12,6 +12,7 @@ from app.nutrition.models.user_restriction import user_restriction
 from app.nutrition.models.dish_ingredient import dish_ingredient
 from app.nutrition.models.dish_restriction import dish_restriction
 from app.auth.models.user_item import user_item
+from app.training.models.user_injury import user_injury
 from app.nutrition.models.restriction import RestrictionModel
 from app.auth.models.user import UserModel
 from app.auth.models.token import TokenModel

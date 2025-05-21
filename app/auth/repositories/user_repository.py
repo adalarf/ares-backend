@@ -12,7 +12,8 @@ class UserRepository:
 
 
     async def get_by_email(self, email: str) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.email == email)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.email == email)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         if user:
@@ -21,7 +22,8 @@ class UserRepository:
 
 
     async def get_by_id(self, user_id: int) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         if user:
@@ -30,7 +32,8 @@ class UserRepository:
     
 
     async def get_user(self, user_id: int) -> Optional[UserModel]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         return user
@@ -45,7 +48,8 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == db_user.id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == db_user.id)
         result = await self.db.execute(query)
         refreshed_user = result.scalar_one_or_none()
         
@@ -53,7 +57,8 @@ class UserRepository:
 
 
     async def update_user(self, user_id: int, user_update: UserUpdate) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         
@@ -67,7 +72,7 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions), selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         refreshed_user = result.scalar_one_or_none()
         
@@ -75,7 +80,7 @@ class UserRepository:
 
 
     async def add_gems_and_experience_blitz(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.blitz_polls), selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.blitz_polls), selectinload(UserModel.restrictions), selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -85,15 +90,28 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         
-        query = select(UserModel).options(selectinload(UserModel.blitz_polls), selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.blitz_polls), selectinload(UserModel.restrictions), selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         refreshed_user = result.scalar_one_or_none()
         
         return User.model_validate(refreshed_user)
     
 
+    async def add_injury_to_user(self, user: UserModel, muscle_groups) -> Optional[User]:
+        for muscle_group in muscle_groups:
+            if muscle_group not in user.injuries:
+                user.injuries.append(muscle_group)
+
+        await self.db.commit()
+        await self.db.refresh(user)
+
+        return User.from_orm(user)
+
+    
+
     async def add_gems_and_experience(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -111,7 +129,8 @@ class UserRepository:
     
 
     async def increase_burned_calories(self, user_id: int, burned_calories: int) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -120,7 +139,7 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions), selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         refreshed_user = result.scalar_one_or_none()
         
@@ -129,7 +148,8 @@ class UserRepository:
 
     async def increase_calories(self, user_id: int, calories: float, proteins: float,
                                 fats: float, carbs: float) -> Optional[User]:
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions),
+                                          selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -141,7 +161,7 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         
-        query = select(UserModel).options(selectinload(UserModel.restrictions)).where(UserModel.id == user_id)
+        query = select(UserModel).options(selectinload(UserModel.restrictions), selectinload(UserModel.injuries)).where(UserModel.id == user_id)
         result = await self.db.execute(query)
         refreshed_user = result.scalar_one_or_none()
         

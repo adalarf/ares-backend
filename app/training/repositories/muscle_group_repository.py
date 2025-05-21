@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from app.training.models.muscle_group import MuscleGroupModel
 from app.training.models.exercise import ExerciseModel
+from app.auth.models.user import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -14,6 +15,12 @@ class MuscleGroupRepository:
         query = select(MuscleGroupModel).where(MuscleGroupModel.name == name)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
+    
+
+    async def get_by_names(self, names: list[str]) -> MuscleGroupModel | None:
+        query = select(MuscleGroupModel).where(MuscleGroupModel.name.in_(names))
+        result = await self.db.execute(query)
+        return result.scalars().all()
 
 
     async def create(self, name: str, image: str = None) -> MuscleGroupModel:
@@ -26,6 +33,16 @@ class MuscleGroupRepository:
 
     async def get_all(self) -> list[MuscleGroupModel]:
         query = select(MuscleGroupModel)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+
+    async def get_except_injuries(self, user_id: int) -> list[MuscleGroupModel]:
+        query = (
+            select(MuscleGroupModel)
+            .options(selectinload(MuscleGroupModel.injured_users))
+            .where(~MuscleGroupModel.injured_users.any(UserModel.id == user_id))
+        )
         result = await self.db.execute(query)
         return result.scalars().all()
 

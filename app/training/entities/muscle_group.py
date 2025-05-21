@@ -8,3 +8,7 @@ class MuscleGroupResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class InjuriesUser(BaseModel):
+    injuries: list[str] = []

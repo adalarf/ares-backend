@@ -1,7 +1,15 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.auth.models.user import GenderEnum, GoalEnum, ActivityEnum, TrainingPlaceEnum, LoadEnum
+
+
+class InjuryMuscleGroup(BaseModel):
+    id: int
+    name: str
+    
+    class Config:
+        from_attributes = True
 
 
 class User(BaseModel):
@@ -21,6 +29,7 @@ class User(BaseModel):
     load: Optional[LoadEnum] = None
     restrictions: Optional[list[str]] = None
     avatar: Optional[str] = None
+    injuries: List[InjuryMuscleGroup] = []
 
     class Config:
         from_attributes = True

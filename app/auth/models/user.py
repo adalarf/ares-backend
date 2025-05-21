@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 from app.nutrition.models.user_restriction import user_restriction
 from app.auth.models.user_item import user_item
+from app.training.models.user_injury import user_injury
 import enum
 
 
@@ -79,6 +80,10 @@ class UserModel(Base):
         secondary=user_item,
         back_populates="users"
     )
+    injuries = relationship("MuscleGroupModel", 
+                            secondary=user_injury, 
+                            back_populates="injured_users",
+                            cascade="all")
     # restriction_details = relationship(
     #     "UserRestrictionModel",
     #     back_populates="user"

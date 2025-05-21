@@ -35,13 +35,14 @@ class TrainingService:
         self.user_repo = user_repo
 
 
-    async def create_weekly_workout_plan(self, user_id: int, training_level: str, training_place: str) -> WeeklyWorkoutPlanResponse:
+    async def create_weekly_workout_plan(self, user_id: int, training_level: str, 
+                                         training_place: str) -> WeeklyWorkoutPlanResponse:
         existing_plan = await self.workout_plan_repo.get_by_user_id(user_id)
         if existing_plan:
             return await self.get_workout_plan_by_id(existing_plan[0].id)
         days_per_week = self.determine_days_per_week(training_level)
         workout_plan = await self.create_workout_plan(user_id)
-        await self.assign_workout_days(workout_plan, days_per_week, training_place)
+        await self.assign_workout_days(workout_plan, days_per_week, training_place, user_id)
         workout_days = await self.workout_day_repo.get_by_workout_plan_id(workout_plan.id)
 
         result_days = []
@@ -101,8 +102,9 @@ class TrainingService:
         return await self.workout_plan_repo.create(workout_plan)
 
 
-    async def assign_workout_days(self, workout_plan: WorkoutPlanModel, days_per_week: int, training_place: str):
-        muscle_groups = await self.muscle_group_repo.get_all()
+    async def assign_workout_days(self, workout_plan: WorkoutPlanModel, days_per_week: int, 
+                                  training_place: str, user_id: int):
+        muscle_groups = await self.muscle_group_repo.get_except_injuries(user_id)
         random.shuffle(muscle_groups)
         selected_groups = muscle_groups[:days_per_week]
 
@@ -326,6 +328,15 @@ class TrainingService:
             for exercise in exercises
         ]
     
+
+    async def add_injury_to_user(self, user_id: int, muscle_group_names: list[str]) -> User:
+        user = await self.user_repo.get_user(user_id)
+        muscle_groups = await self.muscle_group_repo.get_by_names(muscle_group_names)
+
+        result = await self.user_repo.add_injury_to_user(user, muscle_groups)
+
+        return result
+        
 
     async def create_random_exercise(self, workout_plan_data: WorkoutPlanCreation, user_id: int):
         exercises = await self.exercise_repo.get_all()

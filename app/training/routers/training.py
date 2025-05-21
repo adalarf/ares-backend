@@ -14,7 +14,7 @@ from app.training.repositories.random_exercise_repository import RandomExerciseR
 from app.auth.repositories.user_repository import UserRepository
 from app.training.entities.exercise import ExerciseCreation, ExerciseResponse
 from app.training.entities.random_exercise import RandomExerciseInfo
-from app.training.entities.muscle_group import MuscleGroupResponse
+from app.training.entities.muscle_group import MuscleGroupResponse, InjuriesUser
 
 
 router = APIRouter()
@@ -110,6 +110,15 @@ async def get_exercises(
 ):
     exercises = await training_service.get_exercises(muscle_group_id)
     return exercises
+
+
+@router.post("/injuries")
+async def add_injury(muscle_group_names: InjuriesUser, 
+                     current_user: User = Depends(get_current_user),
+                     training_service: TrainingService = Depends(get_training_service)):
+    result = await training_service.add_injury_to_user(current_user.id, muscle_group_names.injuries)
+
+    return result
 
 
 @router.post("/complete_exercise/{exercise_id}")
