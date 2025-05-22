@@ -15,3 +15,12 @@ class DishCreation(BaseModel):
 
 class DishesCreation(BaseModel):
     dishes: List[DishCreation]
+
+
+class DishRestriction(BaseModel):
+    dish_id: int
+    restrictions: list[str]
+
+
+class DishesRestrictions(BaseModel):
+    items: List[DishRestriction]

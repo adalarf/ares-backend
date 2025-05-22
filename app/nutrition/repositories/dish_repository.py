@@ -41,3 +41,41 @@ class DishRepository:
         await self.db.commit()
         await self.db.refresh(dish)
         return dish
+    
+    
+    async def get_all_restrictions(self):
+        query = select(RestrictionModel)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+    
+    async def add_dish_restrictions(self, dish_id: int, restriction_names: list[str]) -> DishModel:
+        # Используем selectinload для явной загрузки связи restrictions вместе с блюдом
+        from sqlalchemy.orm import selectinload
+        query = select(DishModel).options(selectinload(DishModel.restrictions)).where(DishModel.id == dish_id)
+        result = await self.db.execute(query)
+        dish = result.scalar_one_or_none()
+        
+        if not dish:
+            raise ValueError(f"Блюдо с ID {dish_id} не найдено")
+
+        query = select(RestrictionModel).where(RestrictionModel.name.in_(restriction_names))
+        result = await self.db.execute(query)
+        restrictions = result.scalars().all()
+        
+        found_restriction_names = {r.name for r in restrictions}
+        missing_names = set(restriction_names) - found_restriction_names
+        
+        if missing_names:
+            raise ValueError(f"Ограничения не найдены: {', '.join(missing_names)}")
+        
+        # Теперь dish.restrictions уже загружены, так что это работает без проблем
+        existing_restriction_ids = {r.id for r in dish.restrictions}
+        for restriction in restrictions:
+            if restriction.id not in existing_restriction_ids:
+                dish.restrictions.append(restriction)
+        
+        await self.db.commit()
+        await self.db.refresh(dish)
+        
+        return dish

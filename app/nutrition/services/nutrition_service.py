@@ -180,3 +180,40 @@ class NutritionService:
             "fats_eaten": user.fats_eaten_daily or 0.0,
             "carbs_eaten": user.carbs_eaten_daily or 0.0
         }
+    
+    async def add_restrictions(self, user_id: int, restrictions: list[str]):
+        all_restrictions = await self.dish_repo.get_all_restrictions()
+        
+        valid_restrictions = [r for r in all_restrictions if r.name in restrictions]
+        
+        found_names = {r.name for r in valid_restrictions}
+        invalid_names = set(restrictions) - found_names
+        
+        if invalid_names:
+            raise HTTPException(
+                detail=f"Ограничения не найдены: {', '.join(invalid_names)}"
+            )
+        
+        return await self.user_repo.add_restrictions(user_id, [r.id for r in valid_restrictions])
+    
+    
+    async def add_dish_restrictions(self, dish_restrictions_data) -> list:
+        results = []
+        
+        for item in dish_restrictions_data.items:
+            try:
+                dish = await self.dish_repo.add_dish_restrictions(item.dish_id, item.restrictions)
+                results.append({
+                    "dish_id": dish.id,
+                    "name": dish.name,
+                    "restrictions": [r.name for r in dish.restrictions],
+                    "success": True
+                })
+            except ValueError as e:
+                results.append({
+                    "dish_id": item.dish_id,
+                    "error": str(e),
+                    "success": False
+                })
+        
+        return results

@@ -4,7 +4,7 @@ from app.database import Base
 
 
 dish_restriction = Table(
-    "user_restriction",
+    "dish_restriction",
     Base.metadata,
     Column("dish_id", Integer, ForeignKey("dishes.id"), primary_key=True),
     Column("restriction_id", Integer, ForeignKey("restrictions.id"), primary_key=True),

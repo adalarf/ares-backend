@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.models.user import UserModel
 from app.auth.entities.user import User, UserCreate, UserUpdate
+from app.nutrition.models.restriction import RestrictionModel
 from typing import Optional
 from sqlalchemy.orm import selectinload
 
@@ -108,6 +109,45 @@ class UserRepository:
         return User.from_orm(user)
 
     
+    async def add_restrictions(self, user_id: int, restriction_ids: list[int]) -> User:
+        query = select(UserModel).options(
+            selectinload(UserModel.restrictions),
+            selectinload(UserModel.injuries)
+        ).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        user = result.scalar_one_or_none()
+        
+        # if not user:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_404_NOT_FOUND,
+        #         detail=f"Пользователь с ID {user_id} не найден"
+        #     )
+        
+        # Получаем все ограничения, которые нужно добавить
+        restriction_query = select(RestrictionModel).where(
+            RestrictionModel.id.in_(restriction_ids)
+        )
+        result = await self.db.execute(restriction_query)
+        restrictions = result.scalars().all()
+        
+        # Добавляем новые ограничения к существующим
+        existing_ids = {r.id for r in user.restrictions}
+        for restriction in restrictions:
+            if restriction.id not in existing_ids:
+                user.restrictions.append(restriction)
+        
+        await self.db.commit()
+        await self.db.refresh(user)
+        
+        # Загружаем обновленного пользователя с ограничениями
+        query = select(UserModel).options(
+            selectinload(UserModel.restrictions)
+        ).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        updated_user = result.scalar_one_or_none()
+        
+        return User.model_validate(updated_user)
+
 
     async def add_gems_and_experience(self, user_id: int, gems: int = 0, expirience: int = 0) -> Optional[User]:
         query = select(UserModel).options(selectinload(UserModel.restrictions),

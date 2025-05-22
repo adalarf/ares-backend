@@ -12,6 +12,14 @@ class InjuryMuscleGroup(BaseModel):
         from_attributes = True
 
 
+class RestrictionSchema(BaseModel):
+    id: int
+    name: str
+    
+    class Config:
+        from_attributes = True
+
+
 class User(BaseModel):
     id: Optional[int] = None
     email: EmailStr
@@ -27,7 +35,7 @@ class User(BaseModel):
     height: Optional[float] = None
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
-    restrictions: Optional[list[str]] = None
+    restrictions: Optional[list[str | RestrictionSchema]] = []
     avatar: Optional[str] = None
     injuries: List[InjuryMuscleGroup] = []
 

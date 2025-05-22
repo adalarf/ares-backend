@@ -4,7 +4,7 @@ from app.database import get_async_session
 from app.auth.services.auth_service import get_current_user
 from app.nutrition.services.nutrition_service import NutritionService
 from app.nutrition.entities.meal_plan import MealPlanCreation, MealCreate, MealPlanRead, MealRead
-from app.nutrition.entities.dish import DishesCreation
+from app.nutrition.entities.dish import DishesCreation, DishesRestrictions
 from app.nutrition.repositories.dish_repository import DishRepository
 from app.nutrition.repositories.ingredient_repository import IngredientRepository
 from app.nutrition.repositories.meal_plan_repository import MealPlanRepository
@@ -28,7 +28,7 @@ def get_nutrition_service(db: AsyncSession = Depends(get_async_session)) -> Nutr
 async def generate_meal_plan(
     nutrition_service: NutritionService = Depends(get_nutrition_service), 
     current_user: User = Depends(get_current_user)
-):
+):    
     calories = nutrition_service.calculate_bmr(
         current_user.gender.value, 
         current_user.goal.value, 
@@ -36,7 +36,16 @@ async def generate_meal_plan(
         current_user.weight,
         current_user.height
     )
-    filtered_dishes = await nutrition_service.get_filtered_dishes(current_user.goal.value, current_user.restrictions)
+    
+    restriction_names = []
+    if current_user.restrictions:
+        for restriction in current_user.restrictions:
+            if hasattr(restriction, 'name'):
+                restriction_names.append(restriction.name)
+            else:
+                restriction_names.append(restriction)
+    
+    filtered_dishes = await nutrition_service.get_filtered_dishes(current_user.goal.value, restriction_names)
     meal_distribution = nutrition_service.get_meal_distribution(3)
 
     plan_data = []
@@ -154,3 +163,22 @@ async def make_meal_eaten(id: int,
         carbs=meal.carbs,
         is_eaten=meal.is_eaten
     )
+
+
+@router.post("/restrictions")
+async def add_restrictions(
+    restrictions: list[str],
+    nutrition_service: NutritionService = Depends(get_nutrition_service),
+    current_user: User = Depends(get_current_user)
+):
+    updated_user = await nutrition_service.add_restrictions(current_user.id, restrictions)
+    return updated_user
+
+
+@router.post("/dish-restrictions")
+async def add_dish_restrictions(
+    dish_restrictions: DishesRestrictions, 
+    nutrition_service: NutritionService = Depends(get_nutrition_service)
+):
+    results = await nutrition_service.add_dish_restrictions(dish_restrictions)
+    return results
