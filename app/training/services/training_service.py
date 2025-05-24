@@ -146,7 +146,7 @@ class TrainingService:
             is_active=is_active
         )
         return await self.workout_day_repo.create(workout_day)
-
+    
 
     async def assign_exercises_to_day(self, workout_day: WorkoutDayModel, muscle_group: str, 
                                       training_place: str):
@@ -155,8 +155,20 @@ class TrainingService:
         if not exercises:
             print(f"No exercises found for muscle group: {muscle_group} and place: {training_place}")
             return
-
-        for exercise in exercises[:3]:
+        
+        random.shuffle(exercises)
+        
+        unique_exercises = []
+        seen_names = set()
+        
+        for exercise in exercises:
+            if exercise.name not in seen_names:
+                seen_names.add(exercise.name)
+                unique_exercises.append(exercise)
+                if len(unique_exercises) >= 5:
+                    break
+        
+        for exercise in unique_exercises:
             planned_exercise = PlannedExerciseCreation(
                 workout_day_id=workout_day.id,
                 exercise_id=exercise.id,
