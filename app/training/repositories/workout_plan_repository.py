@@ -36,7 +36,13 @@ class WorkoutPlanRepository:
         await self.db.commit()
 
 
-    async def   get_by_user_id(self, user_id: int) -> list[WorkoutPlanModel] | None:
+    async def get_by_user_id(self, user_id: int) -> list[WorkoutPlanModel] | None:
         query = select(WorkoutPlanModel).where(WorkoutPlanModel.user_id == user_id)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+
+    async def get_all(self) -> list[WorkoutPlanModel]:
+        query = select(WorkoutPlanModel)
         result = await self.db.execute(query)
         return result.scalars().all()

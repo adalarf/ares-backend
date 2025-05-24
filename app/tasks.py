@@ -6,6 +6,7 @@ from .config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.training.repositories.workout_plan_repository import WorkoutPlanRepository
 from app.training.services.training_service import TrainingService
 from app.training.repositories.workout_day_repository import WorkoutDayRepository
+from app.auth.repositories.user_repository import UserRepository
 from app.training.repositories.planned_exercise_repository import PlannedExerciseRepository
 from app.training.repositories.muscle_group_repository import MuscleGroupRepository, ExerciseRepository
 from app.training.entities.workout_plan import WorkoutPlanCreation
@@ -23,6 +24,7 @@ async def cleanup_expired_tokens():
 async def cleanup_and_create_new_weekly_plans():
     async with async_session_maker() as session:
         workout_plan_repo = WorkoutPlanRepository(session)
+        user_repo = UserRepository(session)
         workout_day_repo = WorkoutDayRepository(session)
         planned_exercise_repo = PlannedExerciseRepository(session)
         muscle_group_repo = MuscleGroupRepository(session)
@@ -30,17 +32,16 @@ async def cleanup_and_create_new_weekly_plans():
         training_service = TrainingService(
             workout_plan_repo, workout_day_repo, planned_exercise_repo, exercise_repo, muscle_group_repo
         )
-        all_plans = await workout_plan_repo.get_all() # get all
+        all_plans = await workout_plan_repo.get_all()
         today = date.today()
         for plan in all_plans:
             if (today - plan.week_start_date).days >= 7:
                 user_id = plan.user_id
                 await workout_plan_repo.delete(plan.id)
 
-                workout_plan_data = WorkoutPlanCreation(
-                    training_level="low", goal="weight_loss", training_place="home"
-                )
-                await training_service.create_weekly_workout_plan(workout_plan_data, user_id)
+                user = await user_repo.get_user(user_id)
+
+                await training_service.create_weekly_workout_plan(user.id, user.activity.value, user.training_place.value)
 
 
 
