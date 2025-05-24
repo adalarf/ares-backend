@@ -198,10 +198,10 @@ class TrainingService:
         return exercises
 
 
-    async def get_workout_plan_id_by_user_id(self, user_id: int) -> int:
+    async def get_workout_plan_id_by_user_id(self, user_id: int) -> int | str:
         workout_plan = await self.workout_plan_repo.get_by_user_id(user_id)
         if not workout_plan:
-            raise ValueError(f"Workout plan for user ID {user_id} not found.")
+            return None
         return workout_plan[0].id
 
 
