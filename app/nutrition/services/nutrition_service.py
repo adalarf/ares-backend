@@ -76,7 +76,7 @@ class NutritionService:
     def select_dish(self, filtered_dishes: List[DishModel], meal_type: str) -> DishModel:
         suitable_dishes = [
             dish for dish in filtered_dishes 
-            if dish.category.lower() == meal_type.lower()
+            if dish.category == meal_type
         ]
 
         if not suitable_dishes:
