@@ -16,7 +16,8 @@ class RandomExerciseRepository:
             gems=random_exercise.gems,
             expirience=random_exercise.expirience,
             exercise_id=random_exercise.exercise_id,
-            user_id=random_exercise.user_id
+            user_id=random_exercise.user_id,
+            calories=random_exercise.calories
         )
         self.db.add(random_exercise_model)
         await self.db.commit()
