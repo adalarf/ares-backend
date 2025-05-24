@@ -1,8 +1,11 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ExerciseCreation(BaseModel):
     name: str
+    description: Optional[str] = None
+    image: Optional[str] = None
     training_place: str
     muscle_group_id: int
     sets_number_default: int

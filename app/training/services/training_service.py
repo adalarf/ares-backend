@@ -265,6 +265,8 @@ class TrainingService:
             # if not existing_exercise:
             created_exercise = await self.exercise_repo.create(
                 name=exercise_data.name,
+                description=exercise_data.description,
+                image=exercise_data.image,
                 training_place=exercise_data.training_place,
                 muscle_group_id=exercise_data.muscle_group_id,
                 sets_number_default=exercise_data.sets_number_default,
@@ -285,6 +287,7 @@ class TrainingService:
             ExerciseResponse(
                 id=exercise.id,
                 name=exercise.name,
+                description=exercise.description,
                 training_place=exercise.training_place,
                 muscle_group_id=exercise.muscle_group_id,
                 sets_number_default=exercise.sets_number_default,
