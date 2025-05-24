@@ -110,6 +110,15 @@ class ExerciseRepository:
         return result.scalars().all()
     
 
+    async def get_by_training_place_and_intensity(self, training_place: str, intensity) -> list[ExerciseModel]:
+        query = select(ExerciseModel).where(
+            ExerciseModel.training_place == training_place,
+            ExerciseModel.intensity == intensity
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+
     async def get_with_distinct_names(self) -> list[ExerciseModel]:
         query = select(ExerciseModel).distinct(ExerciseModel.name).order_by(ExerciseModel.name)
         result = await self.db.execute(query)

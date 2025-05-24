@@ -57,15 +57,11 @@ async def get_workout_plan(
 
 @router.post("/random_exercise", response_model=RandomExerciseInfo)
 async def create_random_exercise(
-    workout_plan_data: WorkoutPlanCreation,
     current_user: User = Depends(get_current_user),
     training_service: TrainingService = Depends(get_training_service)
-):
-    # workout_plan_id = await training_service.get_workout_plan_id_by_user_id(current_user.id)
-    # if not workout_plan_id:
-    #     raise HTTPException(status_code=404, detail="Workout plan not found")
-    
-    exercise = await training_service.create_random_exercise(workout_plan_data, current_user.id)
+):  
+    exercise = await training_service.create_random_exercise(current_user.training_place.value,
+                                                             current_user.intensity, current_user.id)
     return exercise
 
 
@@ -75,6 +71,8 @@ async def get_random_exercise(
     training_service: TrainingService = Depends(get_training_service)
 ):
     random_exercise = await training_service.get_random_exercises_by_user(current_user.id)
+    if random_exercise is None:
+        raise HTTPException(status_code=404, detail="Случайное упражнение не найдено для данного пользователя")
     return random_exercise
 
 

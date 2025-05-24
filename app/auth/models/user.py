@@ -27,7 +27,7 @@ class ActivityEnum(enum.Enum):
 
 class TrainingPlaceEnum(enum.Enum):
     home = "home"
-    outside = "outside"
+    gym = "gym"
     mixed = "mixed"
 
 

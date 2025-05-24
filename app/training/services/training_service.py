@@ -341,12 +341,9 @@ class TrainingService:
         return result
         
 
-    async def create_random_exercise(self, workout_plan_data: WorkoutPlanCreation, user_id: int):
-        exercises = await self.exercise_repo.get_all()
-        filtered = [e for e in exercises if e.training_place == workout_plan_data.training_place and e.expirience_level == workout_plan_data.training_level]
-        if not filtered:
-            return None
-        exercise = random.choice(filtered)
+    async def create_random_exercise(self, training_place: str, intensity: str,  user_id: int):
+        exercises = await self.exercise_repo.get_by_training_place_and_intensity(training_place, intensity)
+        exercise = random.choice(exercises)
         random_exercise = RandomExerciseCreation(
             exercise_id=exercise.id,
             user_id=user_id,
@@ -354,7 +351,7 @@ class TrainingService:
             repetitions=exercise.repetitions_default,
             gems=exercise.gems_default,
             expirience=exercise.expirience_default,
-            calories=exercise.kg50_calories
+            calories=exercise.kg50_calories,
         )
         random_exercise = await self.random_exercise_repo.create(random_exercise)
 

@@ -35,6 +35,7 @@ class User(BaseModel):
     height: Optional[float] = None
     training_place: Optional[TrainingPlaceEnum] = None
     load: Optional[LoadEnum] = None
+    intensity: Optional[str] = None
     restrictions: Optional[list[str | RestrictionSchema]] = []
     avatar: Optional[str] = None
     injuries: List[InjuryMuscleGroup] = []
