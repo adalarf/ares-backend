@@ -137,3 +137,20 @@ async def complete_random_exercise(
 ):
     await training_service.complete_random_exercise(exercise_id, current_user)
     return {"message": "Exercise completed successfully"}
+
+
+@router.delete("/workout_plan")
+async def delete_workout_plan(
+    current_user: User = Depends(get_current_user),
+    training_service: TrainingService = Depends(get_training_service)
+):
+    try:
+        workout_plan_id = await training_service.get_workout_plan_id_by_user_id(current_user.id)
+        
+        await training_service.delete_workout_plan(workout_plan_id)
+        
+        return {"message": "План тренировок успешно удален"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Произошла ошибка при удалении плана тренировок: {str(e)}")

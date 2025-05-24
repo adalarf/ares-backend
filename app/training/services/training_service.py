@@ -423,4 +423,21 @@ class TrainingService:
         
 
         return random_exercise
-    
+
+
+    async def delete_workout_plan(self, workout_plan_id: int) -> bool:
+        workout_plan = await self.workout_plan_repo.get_by_id(workout_plan_id)
+        if not workout_plan:
+            raise ValueError(f"Workout plan with ID {workout_plan_id} not found.")
+        
+        workout_days = await self.workout_day_repo.get_by_workout_plan_id(workout_plan_id)
+        for workout_day in workout_days:
+            planned_exercises = await self.planned_exercise_repo.get_by_workout_day_id(workout_day.id)
+            for planned_exercise in planned_exercises:
+                await self.planned_exercise_repo.delete(planned_exercise.id)
+            
+            await self.workout_day_repo.delete(workout_day.id)
+        
+        await self.workout_plan_repo.delete(workout_plan_id)
+        
+        return True
