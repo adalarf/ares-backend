@@ -96,10 +96,16 @@ class AuthService:
             access_expires=access_expires,
             refresh_expires=refresh_expires
         )
+        if user.age is not None and user.weight is not None and user.height is not None and user.gender is not None and user.activity is not None:
+            is_filled_parameters = True
+        else:
+            is_filled_parameters = False
+            
 
         return Token(
             access_token=access_token,
-            refresh_token=refresh_token
+            refresh_token=refresh_token,
+            is_filled_parameters=is_filled_parameters
         )
 
 

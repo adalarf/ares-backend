@@ -71,6 +71,7 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    is_filled_parameters: bool = False
 
 
 class TokenData(BaseModel):
