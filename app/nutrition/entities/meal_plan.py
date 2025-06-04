@@ -15,6 +15,7 @@ class MealCreate(BaseModel):
     meal: str
     dish: str
     grams: float
+    calories: float
     proteins: float
     fats: float
     carbs: float

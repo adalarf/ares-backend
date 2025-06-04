@@ -52,6 +52,7 @@ class TrainingService:
                 ExerciseInfo(
                     exercise_id=exercise.exercise_id,
                     workout_day_id=exercise.workout_day_id,
+                    description=exercise.exercise.description or "",
                     sets_number=exercise.sets_number,
                     repetitions=exercise.repetitions,
                     gems=exercise.gems,
@@ -218,6 +219,7 @@ class TrainingService:
                 ExerciseInfo(
                     exercise_id=exercise.id,
                     workout_day_id=exercise.workout_day_id,
+                    description=exercise.exercise.description or "",
                     sets_number=exercise.sets_number,
                     repetitions=exercise.repetitions,
                     gems=exercise.gems,

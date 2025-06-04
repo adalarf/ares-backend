@@ -145,7 +145,7 @@ class NutritionService:
         plan.proteins = sum(meal["proteins"] for meal in plan_data)
         plan.fats = sum(meal["fats"] for meal in plan_data)
         plan.carbs = sum(meal["carbs"] for meal in plan_data)
-        plan.total_calories = sum(meal["grams"] * dish.calories / 100 for meal in plan_data)
+        plan.total_calories = sum(meal["calories"] for meal in plan_data)
         await self.meal_plan_repo.update(plan)
         return plan, meals
 

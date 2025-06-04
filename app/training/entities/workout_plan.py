@@ -31,6 +31,7 @@ class WorkoutPlanResponse(BaseModel):
 class ExerciseInfo(BaseModel):
     exercise_id: int
     workout_day_id: int
+    description: str
     sets_number: int
     repetitions: int
     gems: int
