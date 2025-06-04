@@ -15,3 +15,8 @@ class ItemInfo(BaseModel):
 
 class ItemsInfo(BaseModel):
     items: list[ItemInfo]
+
+
+class ItemShortInfo(BaseModel):
+    price: float
+    path: str

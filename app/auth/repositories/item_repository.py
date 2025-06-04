@@ -3,6 +3,7 @@ from sqlalchemy import select, text
 from app.auth.models.item import ItemModel
 from sqlalchemy.orm import selectinload
 from app.auth.models.user import UserModel
+from app.auth.entities.item import ItemShortInfo
 
 
 class ItemRepository:
@@ -10,12 +11,14 @@ class ItemRepository:
         self.db = db
 
     async def get_by_id(self, item_id: int) -> ItemModel | None:
-        query = select(ItemModel).where(ItemModel.id == item_id)
+        query = select(ItemModel.price, ItemModel.path).where(ItemModel.id == item_id)
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        item = result.first()
+        if item:
+            return ItemShortInfo(price=item[0], path=item[1])
+        return None
 
     async def add_item_to_user(self, user_id: int, item_id: int) -> None:
-        # Используем прямой SQL запрос для вставки в промежуточную таблицу
         await self.db.execute(
             text("""
             INSERT INTO user_items (user_id, item_id)
@@ -28,14 +31,16 @@ class ItemRepository:
     
 
     async def get_all(self) -> list[ItemModel]:
-        query = select(ItemModel)
+        query = select(ItemModel.id, ItemModel.name, ItemModel.path, ItemModel.price, ItemModel.rarity)
         result = await self.db.execute(query)
-        return result.scalars().all()
+        return result.all()
         
-    async def get_items_by_user_id(self, user_id: int) -> list[ItemModel]:
-        query = select(UserModel).options(selectinload(UserModel.items)).where(UserModel.id == user_id)
+    async def get_items_by_user_id(self, user_id: int) -> list[tuple]:
+        query = (
+            select(ItemModel.id, ItemModel.name, ItemModel.path, ItemModel.price, ItemModel.rarity)
+            .join(UserModel.items)
+            .where(UserModel.id == user_id)
+        )
         result = await self.db.execute(query)
-        user = result.scalar_one_or_none()
-        
-        return user.items if user else []
+        return result.all()
     

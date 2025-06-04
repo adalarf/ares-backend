@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends  
 from fastapi.security import OAuth2PasswordBearer
 from app.auth.models.item import ItemModel
+from app.auth.entities.item import ItemInfo
 from app.auth.repositories.user_repository import UserRepository
 from app.auth.repositories.token_repository import TokenRepository
 from app.auth.repositories.item_repository import ItemRepository
@@ -58,7 +59,7 @@ class AuthService:
 
 
     async def authenticate_user(self, user_login: UserLogin) -> Optional[User]:
-        user = await self.user_repository.get_by_email(user_login.email)
+        user = await self.user_repository.get_by_email_new(user_login.email)
         if not user:
             return None
         if not self.verify_password(user_login.password, user.hashed_password):
@@ -67,7 +68,7 @@ class AuthService:
 
 
     async def register_user(self, user_create: UserCreate) -> User:
-        user = await self.user_repository.get_by_email(user_create.email)
+        user = await self.user_repository.get_by_email_new(user_create.email)
         if user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -212,12 +213,7 @@ class AuthService:
     
     
     async def buy_clothes(self, user_id: int, item_id: int) -> User:
-        user = await self.user_repository.get_user(user_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
+        gems = await self.user_repository.get_user_gems(user_id)
         
         item = await self.item_repository.get_by_id(item_id)
         if not item:
@@ -226,15 +222,15 @@ class AuthService:
                 detail="Item not found"
             )
         
-        if user.gems < int(item.price):
+        if gems < int(item.price):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Not enough gems"
             )
-        user.gems -= int(item.price)
+        gems -= int(item.price)
         
         user_update = UserUpdate(
-            gems=user.gems,
+            gems=gems,
             avatar=item.path
         )
         
@@ -244,34 +240,38 @@ class AuthService:
         return updated_user
     
 
-    async def set_user_avatar(self, user_data: User, path: str) -> User:
-        user = await self.user_repository.get_user(user_data.id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
-        
+    async def set_user_avatar(self, user_data: User, path: str) -> User:        
         user_update = UserUpdate(avatar=path)
-        updated_user = await self.user_repository.update_user(user.id, user_update)
+        updated_user = await self.user_repository.update_user(user_data.id, user_update)
         return updated_user
     
 
     async def get_items(self) -> list[ItemModel]:        
         items = await self.item_repository.get_all()
-        return items
+        return [
+            ItemInfo(
+                id=item.id,
+                name=item.name,
+                path=item.path or "",
+                price=int(item.price),
+                rarity=item.rarity or ""
+            )
+            for item in items
+        ]
     
 
-    async def get_user_items(self, user_id: int) -> list[ItemModel]:
-        user = await self.user_repository.get_user(user_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+    async def get_user_items(self, user_id: int) -> list[ItemInfo]:
+        items = await self.item_repository.get_items_by_user_id(user_id)
+        return [
+            ItemInfo(
+                id=item[0],
+                name=item[1],
+                path=item[2] or "",
+                price=int(item[3]),
+                rarity=item[4] or ""
             )
-        
-        user_items = await self.item_repository.get_items_by_user_id(user_id)
-        return user_items
+            for item in items
+        ]
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),

@@ -20,6 +20,13 @@ class UserRepository:
         if user:
             return User.model_validate(user)
         return None
+    
+
+    async def get_by_email_new(self, email: str) -> Optional[User]:
+        query = select(UserModel).where(UserModel.email == email)
+        result = await self.db.execute(query)
+        user = result.scalar_one_or_none()
+        return user
 
 
     async def get_by_id(self, user_id: int) -> Optional[User]:
@@ -38,6 +45,13 @@ class UserRepository:
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
         return user
+    
+    
+    async def get_user_gems(self, user_id: int) -> int:
+        query = select(UserModel.gems).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        user = result.first()
+        return user[0]
 
 
     async def create(self, user: UserCreate, hashed_password: str) -> User:

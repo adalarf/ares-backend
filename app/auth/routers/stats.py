@@ -56,7 +56,6 @@ async def set_user_avatar(
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    
     result = await auth_service.set_user_avatar(current_user, avatar_url.avatar_url)
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
@@ -66,12 +65,12 @@ async def set_user_avatar(
 @router.get("/get_user_avatar")
 async def get_user_avatar(
     current_user: User = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    #auth_service: AuthService = Depends(get_auth_service)
 ):
-    user_avatar = await auth_service.get_user_avatar(current_user.id)
-    if not user_avatar:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar not found")
-    return {"avatar": user_avatar}
+    # user_avatar = await auth_service.get_user_avatar(current_user.id)
+    # if not user_avatar:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar not found")
+    return {"avatar": current_user.avatar}
 
 
 @router.post("/buy_items")
@@ -88,21 +87,8 @@ async def buy_clothes(
 async def get_items_list(
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    db_items = await auth_service.get_items()
-    if not db_items:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Items not found")
-    
-    items_list = []
-    for item in db_items:
-        items_list.append(ItemInfo(
-            id=item.id,
-            name=item.name,
-            path=item.path or "",
-            price=int(item.price),
-            rarity=item.rarity or ""
-        ))
-    
-    return ItemsInfo(items=items_list)
+    items = await auth_service.get_items()
+    return ItemsInfo(items=items)
 
 
 @router.get("/get_user_items", response_model=ItemsInfo)
@@ -111,17 +97,4 @@ async def get_user_items(
     auth_service: AuthService = Depends(get_auth_service)
 ):
     user_items_db = await auth_service.get_user_items(current_user.id)
-    if not user_items_db:
-        return ItemsInfo(items=[])
-    
-    items_list = []
-    for item in user_items_db:
-        items_list.append(ItemInfo(
-            id=item.id,
-            name=item.name,
-            path=item.path or "",
-            price=int(item.price),
-            rarity=item.rarity or ""
-        ))
-    
-    return ItemsInfo(items=items_list)
+    return ItemsInfo(items=user_items_db)
