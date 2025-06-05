@@ -4,6 +4,7 @@ from typing import List
 
 class DishCreation(BaseModel):
     name: str
+    image: str | None = None
     calories: float
     proteins: float
     fats: float

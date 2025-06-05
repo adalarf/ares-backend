@@ -25,10 +25,11 @@ class DishRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def create_dish(self, name: str, calories: float, proteins: float, fats: float,
+    async def create_dish(self, name: str, image: str, calories: float, proteins: float, fats: float,
                           carbs: float, category: str, goal: str, ingredients: list[str]) -> DishModel:
         dish = DishModel(
             name=name,
+            image=image,
             calories=calories,
             proteins=proteins,
             fats=fats,

@@ -114,6 +114,7 @@ class NutritionService:
         
         result = await self.dish_repo.create_dish(
             name=dish_data.name,
+            image=dish_data.image,
             calories=dish_data.calories,
             proteins=dish_data.proteins,
             fats=dish_data.fats,

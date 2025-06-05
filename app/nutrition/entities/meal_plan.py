@@ -14,6 +14,7 @@ class MealPlanCreation(BaseModel):
 class MealCreate(BaseModel):
     meal: str
     dish: str
+    image: str | None = None
     grams: float
     calories: float
     proteins: float

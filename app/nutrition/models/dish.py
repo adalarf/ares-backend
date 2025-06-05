@@ -25,6 +25,7 @@ class DishModel(Base):
     carbs = Column(Float)
     category = Column(String)
     goal = Column(String)
+    image = Column(String, nullable=True)
 
     meals = relationship("MealModel", back_populates="dish", cascade="all, delete-orphan")
     ingredients = relationship(
