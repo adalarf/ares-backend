@@ -125,8 +125,34 @@ class TrainingService:
                                   training_place: str, user_id: int):
         muscle_groups = await self.muscle_group_repo.get_except_injuries(user_id)
         random.shuffle(muscle_groups)
-        selected_groups = muscle_groups[:days_per_week]
+        
+        body_parts = {
+            "Верх": ["Грудь", "Спина", "Плечи", "Бицепс", "Трицепс", "Пресс"],
+            "Низ": ["Ноги", "Кардио"]
+        }
+        upper = [mg for mg in muscle_groups if mg.name in body_parts["Верх"]]
+        lower = [mg for mg in muscle_groups if mg.name in body_parts["Низ"]]
+        random.shuffle(upper)
+        random.shuffle(lower)
+        
+        selected_groups = []
+        u, l = 0, 0
+        for i in range(days_per_week):
+            if (i % 2 == 0 and u < len(upper)) or l >= len(lower):
+                selected_groups.append(upper[u])
+                u += 1
+            elif l < len(lower):
+                selected_groups.append(lower[l])
+                l += 1
 
+        while len(selected_groups) < days_per_week:
+            if u < len(upper):
+                selected_groups.append(upper[u])
+                u += 1
+            elif l < len(lower):
+                selected_groups.append(lower[l])
+                l += 1
+        
         today = date.today()
         workout_days = []
         for day_index, muscle_group in enumerate(selected_groups):
@@ -184,7 +210,7 @@ class TrainingService:
             if exercise.name not in seen_names:
                 seen_names.add(exercise.name)
                 unique_exercises.append(exercise)
-                if len(unique_exercises) >= 3:
+                if len(unique_exercises) >= 5:
                     break
         
         for exercise in unique_exercises:
