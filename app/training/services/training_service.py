@@ -65,12 +65,30 @@ class TrainingService:
                 for exercise in planned_exercises
             ]
             total_calories = sum(exercise.calories for exercise in planned_exercises)
+
+            body_parts = {
+                "Верх": ["Грудь", "Спина", "Плечи", "Бицепс", "Трицепс", "Пресс"],
+                "Низ": ["Ноги", "Кардио"]
+            }
+
+            muscle_body_part = workout_day.muscle_group.name
+            for i in body_parts:
+                if muscle_body_part in body_parts[i]:
+                    body_part = i
+                    muscles_names = body_parts[i]
+                    muscles = await self.muscle_group_repo.get_by_names(muscles_names)
+
+            if body_part == "Верх":
+                image = "https://storage.yandexcloud.net/ares-bucket/bodyparts/upper.png"
+            else:
+                image = "https://storage.yandexcloud.net/ares-bucket/bodyparts/lower.png"
+            
             result_days.append(WorkoutDayInfo(
                 id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
-                image=workout_day.muscle_group.image or "" if workout_day.muscle_group else "",
-                muscle_group=workout_day.muscle_group.name if workout_day.muscle_group else "",
+                image=image,
+                muscle_group=body_part,
                 is_active=workout_day.is_active,
                 is_completed=workout_day.is_completed,
                 exercises=exercises_info,
@@ -166,7 +184,7 @@ class TrainingService:
             if exercise.name not in seen_names:
                 seen_names.add(exercise.name)
                 unique_exercises.append(exercise)
-                if len(unique_exercises) >= 5:
+                if len(unique_exercises) >= 3:
                     break
         
         for exercise in unique_exercises:
@@ -188,8 +206,24 @@ class TrainingService:
             print(f"Muscle group not found: {muscle_group}")
             return []
 
-        exercises = await self.exercise_repo.get_by_muscle_group_and_place(
-            muscle_group_id=muscle_group_model.id,
+        body_parts = {
+            "Верх": ["Грудь", "Спина", "Плечи", "Бицепс", "Трицепс", "Пресс"],
+            "Низ": ["Ноги", "Кардио"]
+        }
+
+        muscle_body_part = muscle_group_model.name
+        for i in body_parts:
+            if muscle_body_part in body_parts[i]:
+                body_part = i
+                muscles_names = body_parts[i]
+                muscles = await self.muscle_group_repo.get_by_names(muscles_names)
+
+        muscles_id = []
+        for muscle in muscles:
+            muscles_id.append(muscle.id)
+
+        exercises = await self.exercise_repo.get_by_body_part_and_place(
+            muscles=muscles_id,
             training_place=training_place
         )
 
@@ -232,12 +266,31 @@ class TrainingService:
                 for exercise in planned_exercises
             ]
             total_calories = sum(exercise.calories for exercise in planned_exercises)
+
+            body_parts = {
+                "Верх": ["Грудь", "Спина", "Плечи", "Бицепс", "Трицепс", "Пресс"],
+                "Низ": ["Ноги", "Кардио"]
+            }
+
+            muscle_body_part = workout_day.muscle_group.name
+            for i in body_parts:
+                if muscle_body_part in body_parts[i]:
+                    body_part = i
+                    muscles_names = body_parts[i]
+                    muscles = await self.muscle_group_repo.get_by_names(muscles_names)
+
+            if body_part == "Верх":
+                image = "https://storage.yandexcloud.net/ares-bucket/bodyparts/upper.png"
+            else:
+                image = "https://storage.yandexcloud.net/ares-bucket/bodyparts/lower.png"
+
+                
             days_info.append(WorkoutDayInfo(
                 id=workout_day.id,
                 day_of_week=workout_day.day_of_week,
                 date=workout_day.date.strftime("%Y-%m-%d") if workout_day.date else None,
-                image=workout_day.muscle_group.image or "" if workout_day.muscle_group else "",
-                muscle_group=workout_day.muscle_group.name if workout_day.muscle_group else "",
+                image=image,
+                muscle_group=body_part,
                 is_active=workout_day.is_active,
                 is_completed=workout_day.is_completed,
                 exercises=exercises_info,

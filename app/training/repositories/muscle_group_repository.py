@@ -17,6 +17,12 @@ class MuscleGroupRepository:
         return result.scalar_one_or_none()
     
 
+    async def get_by_name_with_photo(self, name: str) -> MuscleGroupModel | None:
+        query = select(MuscleGroupModel).where(MuscleGroupModel.name == name, MuscleGroupModel.image != None)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+    
+
     async def get_by_names(self, names: list[str]) -> MuscleGroupModel | None:
         query = select(MuscleGroupModel).where(MuscleGroupModel.name.in_(names))
         result = await self.db.execute(query)
@@ -67,7 +73,16 @@ class ExerciseRepository:
     async def get_by_muscle_group_and_place(self, muscle_group_id: int, training_place: str) -> list[ExerciseModel]:
         query = select(ExerciseModel).options(selectinload(ExerciseModel.muscle_group)).where(
             ExerciseModel.muscle_group_id == muscle_group_id,
-            ExerciseModel.training_place == training_place
+            ExerciseModel.training_place == training_place,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+
+    async def get_by_body_part_and_place(self, muscles: int, training_place: str) -> list[ExerciseModel]:
+        query = select(ExerciseModel).options(selectinload(ExerciseModel.muscle_group)).where(
+            ExerciseModel.muscle_group_id.in_(muscles),
+            ExerciseModel.training_place == training_place,
         )
         result = await self.db.execute(query)
         return result.scalars().all()
