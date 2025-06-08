@@ -40,7 +40,8 @@ async def create_workout_plan(
 ):
     return await training_service.create_weekly_workout_plan(current_user.id, 
                                                              current_user.activity.value,
-                                                             current_user.training_place.value) 
+                                                             current_user.training_place.value,
+                                                             current_user.weight) 
 
 
 @router.get("/workout_plan", response_model=WeeklyWorkoutPlanResponse | str)

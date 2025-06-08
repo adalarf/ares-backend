@@ -36,13 +36,13 @@ class TrainingService:
 
 
     async def create_weekly_workout_plan(self, user_id: int, training_level: str, 
-                                         training_place: str) -> WeeklyWorkoutPlanResponse:
+                                         training_place: str, weight: float) -> WeeklyWorkoutPlanResponse:
         existing_plan = await self.workout_plan_repo.get_by_user_id(user_id)
         if existing_plan:
             return await self.get_workout_plan_by_id(existing_plan[0].id)
         days_per_week = self.determine_days_per_week(training_level)
         workout_plan = await self.create_workout_plan(user_id)
-        await self.assign_workout_days(workout_plan, days_per_week, training_place, user_id)
+        await self.assign_workout_days(workout_plan, days_per_week, training_place, user_id, weight)
         workout_days = await self.workout_day_repo.get_by_workout_plan_id(workout_plan.id)
 
         result_days = []
@@ -122,7 +122,7 @@ class TrainingService:
 
 
     async def assign_workout_days(self, workout_plan: WorkoutPlanModel, days_per_week: int, 
-                                  training_place: str, user_id: int):
+                                  training_place: str, user_id: int, weight: float):
         muscle_groups = await self.muscle_group_repo.get_except_injuries(user_id)
         random.shuffle(muscle_groups)
         
@@ -164,7 +164,7 @@ class TrainingService:
                                                         workout_day_date=workout_day_date,
                                                         is_active=is_active)
             await self.assign_exercises_to_day(workout_day, muscle_group.name, 
-                                               training_place)
+                                               training_place, weight)
             workout_days.append(workout_day)
 
         return workout_days
@@ -193,8 +193,22 @@ class TrainingService:
         return await self.workout_day_repo.create(workout_day)
     
 
+    def determine_metabolic_equivalent(self, weight: float, exercise):
+        met = {
+            "50": exercise.kg50_calories,
+            "60": exercise.kg50_calories,
+            "70": exercise.kg50_calories,
+            "80": exercise.kg50_calories,
+            "90": exercise.kg50_calories,
+            "100": exercise.kg50_calories,
+        }
+        rounded = str((weight + 5) // 10 * 10)
+        if met.get(rounded):
+            return met[rounded]
+
+
     async def assign_exercises_to_day(self, workout_day: WorkoutDayModel, muscle_group: str, 
-                                      training_place: str):
+                                      training_place: str, weight: float):
         exercises = await self.get_exercises_for_muscle_group(muscle_group, training_place)
 
         if not exercises:
@@ -214,6 +228,7 @@ class TrainingService:
                     break
         
         for exercise in unique_exercises:
+            calories = self.determine_metabolic_equivalent(weight, exercise)
             planned_exercise = PlannedExerciseCreation(
                 workout_day_id=workout_day.id,
                 exercise_id=exercise.id,
@@ -221,7 +236,7 @@ class TrainingService:
                 repetitions=exercise.repetitions_default,
                 gems=exercise.gems_default,
                 expirience=exercise.expirience_default,
-                calories=exercise.kg50_calories,
+                calories=calories,
             )
             await self.planned_exercise_repo.create(planned_exercise)
 
