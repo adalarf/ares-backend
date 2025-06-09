@@ -195,16 +195,18 @@ class TrainingService:
 
     def determine_metabolic_equivalent(self, weight: float, exercise):
         met = {
-            "50": exercise.kg50_calories,
-            "60": exercise.kg50_calories,
-            "70": exercise.kg50_calories,
-            "80": exercise.kg50_calories,
-            "90": exercise.kg50_calories,
-            "100": exercise.kg50_calories,
+            50: exercise.kg50_calories,
+            60: exercise.kg60_calories,
+            70: exercise.kg70_calories,
+            80: exercise.kg80_calories,
+            90: exercise.kg90_calories,
+            100: exercise.kg100_calories,
         }
-        rounded = str((weight + 5) // 10 * 10)
-        if met.get(rounded):
-            return met[rounded]
+        rounded = int((weight + 5) // 10 * 10)
+        if rounded not in met:
+            closest = min(met.keys(), key=lambda x: abs(x - rounded))
+            return met[closest] or 0.0
+        return met[rounded] or 0.0
 
 
     async def assign_exercises_to_day(self, workout_day: WorkoutDayModel, muscle_group: str, 
